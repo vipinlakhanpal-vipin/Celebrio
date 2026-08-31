@@ -71,7 +71,7 @@ export function DashboardClient({
 
   return (
     <div>
-      <PageHeader title={`Good to see you, ${firstName}`} subtitle="Here's what's coming up" />
+      <PageHeader title={`Welcome, ${firstName}`} subtitle="Here's what's coming up" />
 
       {prompts.length > 0 && (
         <div className="mb-5 flex flex-col gap-2">
