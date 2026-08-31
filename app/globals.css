@@ -1,0 +1,243 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   Design tokens
+   --accent is overridden at runtime (inline style on <html>) from the user's
+   saved profile.accent_color, so the whole UI re-colors instantly.
+   ========================================================================= */
+/* Indigo Studio — the palette picked from the mockup review. */
+:root {
+  --bg: #f5f6fb;
+  --bg-elevated: #ffffff;
+  --card: #ffffff;
+  --fg: #1b1d2b;
+  --muted: #6b7089;
+  --border: #e4e5f1;
+  --accent: #4f46e5;
+  --accent-fg: #ffffff;
+  --accent-soft: #ecebfc;
+  --ring: color-mix(in oklab, var(--accent) 45%, white);
+  --success: #0e9f6e;
+  --danger: #e4453a;
+  --warning: #f59e0b;
+  --gradient-a: #4f46e5;
+  --gradient-b: #7c6cff;
+  --gradient-c: #f59e0b;
+  --shadow-sm: 0 1px 2px rgba(27, 29, 43, 0.06);
+  --shadow-md: 0 8px 24px -8px rgba(27, 29, 43, 0.16);
+  --shadow-lg: 0 16px 40px -12px rgba(27, 29, 43, 0.24);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0e0f1a;
+  --bg-elevated: #171827aa;
+  --card: #171827;
+  --fg: #eeeffa;
+  --muted: #9497b8;
+  --border: #262842;
+  --accent: #8b7eff;
+  --accent-fg: #ffffff;
+  --accent-soft: #211f3b;
+  --ring: color-mix(in oklab, var(--accent) 55%, #171827);
+  --success: #34d399;
+  --danger: #f87171;
+  --warning: #fbbf24;
+  --gradient-a: #8b7eff;
+  --gradient-b: #6a5bff;
+  --gradient-c: #fbbf24;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 48px -12px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --bg: #0e0f1a;
+    --bg-elevated: #171827aa;
+    --card: #171827;
+    --fg: #eeeffa;
+    --muted: #9497b8;
+    --border: #262842;
+    --accent: #8b7eff;
+    --accent-fg: #ffffff;
+    --accent-soft: #211f3b;
+    --ring: color-mix(in oklab, var(--accent) 55%, #171827);
+    --success: #34d399;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --gradient-a: #8b7eff;
+    --gradient-b: #6a5bff;
+    --gradient-c: #fbbf24;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 20px 48px -12px rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-outfit);
+}
+
+.font-display {
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* ============================================================================
+   Reusable primitives
+   ========================================================================= */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.input {
+  width: 100%;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--fg);
+  padding: 0.65rem 0.9rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+.input::placeholder {
+  color: var(--muted);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.85rem;
+  background: var(--accent);
+  color: var(--accent-fg);
+  padding: 0.65rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+.btn-primary:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.85rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--fg);
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 0.7rem;
+  color: var(--muted);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.btn-ghost:hover {
+  background: var(--accent-soft);
+  color: var(--fg);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.gradient-hero {
+  background: linear-gradient(
+    120deg,
+    var(--gradient-c) 0%,
+    var(--gradient-a) 55%,
+    var(--gradient-b) 100%
+  );
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-float-in {
+  animation: float-in 0.25s ease both;
+}
