@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <ThemeProvider>
-      <div className="flex min-h-dvh flex-col">
+      <div className="flex min-h-svh flex-col">
         <NavBar pendingCount={count ?? 0} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-5 md:px-6 md:pb-10 md:pt-8">
           {children}
