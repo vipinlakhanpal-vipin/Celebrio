@@ -20,7 +20,7 @@ export default async function DashboardPage() {
       supabase.from("contacts").select("*").eq("user_id", userId),
       supabase
         .from("occasion_prompts")
-        .select("*, occasion_type:occasion_types(*)")
+        .select("*, occasion_type:occasion_types(*)"
         .eq("user_id", userId)
         .eq("status", "pending")
         .order("occasion_date", { ascending: true }),
@@ -28,7 +28,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
-      firstName={(profile?.full_name || user?.email || "there").split(" ")[0]}
+      firstName={(profile?.full_name || user?.email?.split("@")[0] || "there").split(" ")[0]}
       contactCount={contactCount ?? 0}
       pendingApprovals={pendingApprovals || []}
       contacts={contacts || []}
