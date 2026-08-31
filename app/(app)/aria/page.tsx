@@ -1,11 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { AriaChatClient } from "@/components/aria/AriaChatClient";
 
 export default async function AriaPage() {
+  const user = await getCurrentUser();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const { data: history } = await supabase
     .from("aria_messages")

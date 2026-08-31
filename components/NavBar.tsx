@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -12,9 +13,11 @@ import {
   LogOut,
   Moon,
   Sun,
+  RefreshCw,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { useTheme } from "@/components/ThemeProvider";
+import { APP_VERSION } from "@/lib/version";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
@@ -28,12 +31,41 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const [latestVersion, setLatestVersion] = useState(APP_VERSION);
+  const updateAvailable = latestVersion !== APP_VERSION;
 
   async function signOut() {
     await fetch("/api/signout", { method: "POST" });
     router.push("/login");
     router.refresh();
   }
+
+  // Poll the live deployed version so we can nudge the user to refresh once
+  // a new build has shipped, without them having to notice on their own.
+  useEffect(() => {
+    let cancelled = false;
+    async function checkVersion() {
+      try {
+        const res = await fetch("/api/version", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && data?.version) setLatestVersion(data.version);
+      } catch {
+        // offline or transient network error — just try again next interval
+      }
+    }
+    checkVersion();
+    const interval = setInterval(checkVersion, 5 * 60 * 1000);
+    function onVisible() {
+      if (document.visibilityState === "visible") checkVersion();
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
 
   return (
     <>
@@ -83,6 +115,16 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
           </nav>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="btn-ghost relative !px-2.5 text-xs font-medium text-[var(--muted)]"
+              title={updateAvailable ? `New version available (v${latestVersion}) — click to refresh` : `Celebrio v${APP_VERSION}`}
+            >
+              v{APP_VERSION}
+              {updateAvailable && (
+                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-red-500" />
+              )}
+            </button>
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="btn-ghost"
@@ -161,6 +203,26 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
               </Link>
             );
           })}
+
+          <button
+            onClick={() => window.location.reload()}
+            className="relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium"
+            aria-label={updateAvailable ? "Update available — tap to refresh" : "Refresh"}
+          >
+            <span className="relative">
+              <RefreshCw
+                size={20}
+                color={updateAvailable ? "var(--accent)" : "var(--muted)"}
+                strokeWidth={updateAvailable ? 2.4 : 2}
+              />
+              {updateAvailable && (
+                <span className="absolute -right-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-[var(--bg)]" />
+              )}
+            </span>
+            <span style={{ color: updateAvailable ? "var(--accent)" : "var(--muted)" }}>
+              {updateAvailable ? "Update" : "Refresh"}
+            </span>
+          </button>
         </div>
       </nav>
     </>

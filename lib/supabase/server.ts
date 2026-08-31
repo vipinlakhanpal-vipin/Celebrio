@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 /**
  * Server-side Supabase client for use in Server Components, Route Handlers,
@@ -31,6 +32,22 @@ export async function createClient() {
     }
   );
 }
+
+/**
+ * The layout and every page under app/(app)/ each independently ask "who is
+ * signed in?" — and auth.getUser() always makes a real network round-trip to
+ * Supabase's auth server to verify the token (by design, unlike the
+ * local-only getSession()). Without this, one page load could fire off 2-3
+ * of those round trips back-to-back. React's cache() dedupes it to a single
+ * call per request, wherever it's called from within that same request.
+ */
+export const getCurrentUser = cache(async () => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+});
 
 /**
  * Admin client using the service-role key. NEVER import this from a

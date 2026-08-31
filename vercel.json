@@ -1,5 +1,5 @@
 {
-  "regions": ["syd1"],
+  "regions": ["bom1"],
   "crons": [
     { "path": "/api/approvals/generate", "schedule": "0 6 * * *" },
     { "path": "/api/occasions/generate", "schedule": "0 6 * * *" },

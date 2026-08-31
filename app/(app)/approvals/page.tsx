@@ -1,11 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import { ApprovalsClient } from "@/components/approvals/ApprovalsClient";
 
 export default async function ApprovalsPage() {
+  const user = await getCurrentUser();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
   const { data: approvals } = await supabase
     .from("approvals")
