@@ -82,3 +82,21 @@ export const RELATIONSHIP_OPTIONS = [
   "Neighbor",
   "Other",
 ];
+
+export const RELATIONSHIP_CATEGORIES: Record<string, string[]> = {
+    family: ["Spouse / Partner", "Mother", "Father", "Sibling", "Child", "Grandparent"],
+    friends: ["Friend", "Best Friend"],
+    colleagues: ["Colleague", "Manager", "Client"],
+    relatives: ["Relative"],
+};
+
+export function relationshipCategory(relationship: string | null | undefined): string | null {
+    if (!relationship) return null;
+    const value = relationship.trim().toLowerCase();
+    for (const key of Object.keys(RELATIONSHIP_CATEGORIES)) {
+          if (RELATIONSHIP_CATEGORIES[key].some((option) => option.toLowerCase() === value)) {
+                  return key;
+          }
+    }
+    return null;
+}
