@@ -32,7 +32,7 @@ export function AriaChatClient({ initialMessages }: { initialMessages: Message[]
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed }),
+
       });
       const json = await res.json();
       setMessages((prev) => [...prev, { role: "assistant", content: json.reply || "Sorry, something went wrong." }]);
@@ -44,7 +44,7 @@ export function AriaChatClient({ initialMessages }: { initialMessages: Message[]
   }
 
   return (
-    <div className="flex h-[calc(100dvh-8.5rem)] flex-col md:h-[calc(100dvh-11rem)]">
+    <div className="flex h-[calc(100dvh-10.75rem)] flex-col md:h-[calc(100dvh-8.5rem)]">
       <div className="mb-4 flex items-center gap-3">
         <span
           className="flex h-11 w-11 items-center justify-center rounded-2xl text-white shadow-sm"
