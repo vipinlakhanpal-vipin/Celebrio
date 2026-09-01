@@ -3,4 +3,4 @@
 // baked into the currently-loaded page against /api/version (which always
 // reflects whatever is actually deployed) to tell the user a refresh is
 // available.
-export const APP_VERSION = "1.2";
+export const APP_VERSION = "1.3";
