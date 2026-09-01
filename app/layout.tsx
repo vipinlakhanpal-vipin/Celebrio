@@ -18,11 +18,17 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Celebrio",
   description: "Celebrio — never miss a birthday, anniversary, or holiday. Upload contacts, review AI-drafted greetings, and send them right on time.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Celebrio",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#4F46E5",
 };
 
