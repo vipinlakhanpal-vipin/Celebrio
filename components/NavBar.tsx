@@ -78,7 +78,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
             >
               <Cake size={18} />
             </span>
-            <span className="font-display text-[15px] font-semibold">Celebrio</span>
+            <span className="font-display text-[19px] font-semibold">Celebrio</span>
           </Link>
 
           <nav className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--card)] p-1 shadow-sm">
@@ -149,7 +149,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
           <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white gradient-hero">
             <Cake size={16} />
           </span>
-          <span className="font-display text-[15px] font-semibold">Celebrio</span>
+          <span className="font-display text-[19px] font-semibold">Celebrio</span>
         </Link>
         <div className="flex items-center gap-1">
           <button
