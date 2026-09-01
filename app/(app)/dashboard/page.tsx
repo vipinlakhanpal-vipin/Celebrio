@@ -28,7 +28,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
-      firstName={(profile?.full_name || user?.email?.split("@")[0] || "there").split(" ")[0]}
+      firstName={(profile?.full_name && !profile.full_name.includes("@") ? profile.full_name : user?.email?.split("@")[0] || "there").split(" ")[0]}
       contactCount={contactCount ?? 0}
       pendingApprovals={pendingApprovals || []}
       contacts={contacts || []}
