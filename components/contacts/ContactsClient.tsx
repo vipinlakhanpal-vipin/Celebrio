@@ -87,7 +87,12 @@ export function ContactsClient({ initialContacts }: { initialContacts: Contact[]
         }
       />
 
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      {/* Wrap onto multiple lines instead of scrolling horizontally — a
+          narrow phone screen can't fit all six tabs on one row, and a
+          scroll-only row gave no visual hint that "Relatives"/"Others"
+          existed off to the right. Wrapping keeps every tab visible and
+          tappable without a swipe someone has to discover first. */}
+      <div className="mb-4 flex flex-wrap gap-2">
         {CATEGORY_TABS.map((t) => (
       <button
         key={t.key}
