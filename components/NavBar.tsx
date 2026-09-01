@@ -7,9 +7,8 @@ import {
   LayoutDashboard,
   Users,
   CalendarHeart,
-  Sparkles,
+  Bot,
   Settings,
-  Cake,
   LogOut,
   Moon,
   Sun,
@@ -23,9 +22,80 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/approvals", label: "Approvals", icon: CalendarHeart, badgeKey: "approvals" as const },
-  { href: "/aria", label: "Aria", icon: Sparkles },
+  { href: "/aria", label: "Aria", icon: Bot },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
+
+// Aria's own mark: an AI-agent glyph that's always purple (regardless of the
+// user's chosen accent color) with a couple of tiny dots orbiting it, so the
+// assistant reads as "alive" and distinct from the rest of the nav at a glance.
+function AriaIcon({
+  size,
+  dotless = false,
+  iconColor = "#8b5cf6",
+  dotColor = "#c4b5fd",
+}: {
+  size: number;
+  dotless?: boolean;
+  iconColor?: string;
+  dotColor?: string;
+}) {
+  const ring = size + 12;
+  return (
+    <span
+      className="relative inline-flex shrink-0 items-center justify-center"
+      style={{ width: ring, height: ring }}
+    >
+      <span className="absolute inset-0 animate-spin" style={{ animationDuration: "3s" }} aria-hidden="true">
+        <span
+          className="absolute left-1/2 top-0 h-1.5 w-1.5 -translate-x-1/2 rounded-full"
+          style={{ background: dotColor }}
+        />
+        {!dotless && (
+          <>
+            <span
+              className="absolute bottom-0 left-0.5 h-1 w-1 rounded-full"
+              style={{ background: dotColor, opacity: 0.75 }}
+            />
+            <span
+              className="absolute bottom-0 right-0.5 h-1 w-1 rounded-full"
+              style={{ background: dotColor, opacity: 0.55 }}
+            />
+          </>
+        )}
+      </span>
+      <Bot size={size} strokeWidth={2.3} style={{ color: iconColor }} />
+    </span>
+  );
+}
+
+// The whole logo: no icon box, just the name itself set in a warm serif —
+// the way a fine stationer's wordmark works — with the dot on the "i"
+// swapped for a small gold-to-rose spark instead of the font's plain dot.
+function Wordmark({ size }: { size: number }) {
+  return (
+    <span className="font-wordmark font-semibold text-[var(--fg)]" style={{ fontSize: size }} aria-label="Celebrio">
+      <span aria-hidden="true">
+        Celebr
+        <span className="relative inline-block">
+          ı
+          <span
+            className="absolute rounded-full"
+            style={{
+              left: "50%",
+              top: "-0.3em",
+              width: "0.16em",
+              height: "0.16em",
+              transform: "translateX(-50%)",
+              background: "linear-gradient(135deg, #ffd27a, #d6336c)",
+            }}
+          />
+        </span>
+        o
+      </span>
+    </span>
+  );
+}
 
 export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
   const pathname = usePathname();
@@ -72,19 +142,15 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
       {/* ---------- Desktop / tablet top bar ---------- */}
       <header className="sticky top-0 z-40 hidden border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur md:block">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-[var(--fg)]">
-            <span
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm gradient-hero"
-            >
-              <Cake size={18} />
-            </span>
-            <span className="font-display text-[19px] font-semibold">Celebrio</span>
+          <Link href="/dashboard" className="flex items-center font-semibold text-[var(--fg)]">
+            <Wordmark size={22} />
           </Link>
 
           <nav className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--card)] p-1 shadow-sm">
             {NAV_ITEMS.map((item) => {
               const active = pathname.startsWith(item.href);
               const Icon = item.icon;
+              const isAriaItem = item.href === "/aria";
               return (
                 <Link
                   key={item.href}
@@ -97,7 +163,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
                   )}
                   style={active ? { background: "var(--accent)" } : undefined}
                 >
-                  <Icon size={16} />
+                  {isAriaItem ? <AriaIcon size={15} dotless /> : <Icon size={16} />}
                   {item.label}
                   {item.badgeKey === "approvals" && pendingCount > 0 && (
                     <span
@@ -115,6 +181,17 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Explicit refresh action — the version badge next to it is
+                clickable too, but a dedicated icon makes "tap to reload"
+                discoverable without having to notice the badge is a button. */}
+            <button
+              onClick={() => window.location.reload()}
+              className="btn-ghost"
+              aria-label="Refresh"
+              title="Refresh"
+            >
+              <RefreshCw size={16} color={updateAvailable ? "var(--accent)" : "var(--muted)"} />
+            </button>
             <button
               onClick={() => window.location.reload()}
               className="btn-ghost relative !px-2.5 text-xs font-medium text-[var(--muted)]"
@@ -145,11 +222,8 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
         className="sticky top-0 z-40 flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg)]/90 px-4 backdrop-blur md:hidden"
         style={{ height: "calc(3.5rem + env(safe-area-inset-top))", paddingTop: "env(safe-area-inset-top)" }}
       >
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-[var(--fg)]">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white gradient-hero">
-            <Cake size={16} />
-          </span>
-          <span className="font-display text-[19px] font-semibold">Celebrio</span>
+        <Link href="/dashboard" className="flex items-center font-semibold text-[var(--fg)]">
+          <Wordmark size={21} />
         </Link>
         <div className="flex items-center gap-1">
           <button
@@ -195,12 +269,14 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
                 {isAria ? (
                   <span
                     className={clsx(
-                      "flex h-9 w-9 -translate-y-2 items-center justify-center rounded-full text-white shadow-md transition-transform",
+                      "flex h-9 w-9 -translate-y-2 items-center justify-center rounded-full shadow-md transition-transform",
                       active ? "scale-105" : ""
                     )}
-                    style={{ background: "var(--accent)" }}
+                    // Always purple here regardless of the user's chosen accent —
+                    // Aria is the AI feature and gets its own signature color.
+                    style={{ background: "linear-gradient(135deg, #a78bfa, #7c3aed)" }}
                   >
-                    <Icon size={17} />
+                    <AriaIcon size={15} iconColor="white" dotColor="rgba(255,255,255,0.85)" />
                   </span>
                 ) : (
                   <span className="relative">
