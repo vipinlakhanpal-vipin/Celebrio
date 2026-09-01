@@ -168,10 +168,13 @@ export function DashboardClient({
             {upcoming.map((item) => {
               // null for the "unknown year" placeholder some dates use — in
               // that case we genuinely don't know the age/anniversary count,
-              // so nothing is shown rather than a misleading number.
+              // so we fall back to the plain occasion word with no ordinal.
               const age = turningAge(item.date, nextOccurrenceDate(item.date));
+              const occasionWord = item.kind === "birthday" ? "Birthday" : "Anniversary";
+              const occasionLabel = age !== null ? `${ordinal(age)} ${occasionWord}` : occasionWord;
+              const icon = item.kind === "birthday" ? "🎂" : "💕";
               return (
-              <div key={`${item.contact.id}-${item.kind}`} className="flex items-center gap-2 p-3">
+              <div key={`${item.contact.id}-${item.kind}`} className="flex items-start gap-2.5 p-3">
                 <span
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
                   style={{ background: `linear-gradient(135deg, ${gradientFor(item.contact.full_name).join(",")})` }}
@@ -179,53 +182,46 @@ export function DashboardClient({
                   {initials(item.contact.full_name)}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-[var(--fg)]">
-                    {item.contact.full_name}
-                    {age !== null && (
-                      <span className="font-normal text-[var(--muted)]">
-                        {" "}
-                        · {item.kind === "birthday" ? `Turning ${age}` : `${ordinal(age)} Anniversary`}
-                      </span>
-                    )}
+                  {/* Row 1: name (wraps instead of truncating so a long name is
+                      never cut off) + the day countdown, pinned to the right. */}
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="break-words text-sm font-medium leading-snug text-[var(--fg)]">
+                      {item.contact.full_name}
+                    </p>
+                    <span
+                      className="badge shrink-0 whitespace-nowrap"
+                      style={
+                        item.days === 0
+                          ? { background: "var(--accent)", color: "var(--accent-fg)" }
+                          : { background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--muted)" }
+                      }
+                    >
+                      {item.days === 0 ? (
+                        "Today 🎉"
+                      ) : (
+                        <>
+                          {item.days} Day{item.days === 1 ? "" : "s"}
+                          {/* "Remaining" only fits alongside everything else once the
+                              row has room to breathe (sm breakpoint+) — hidden on a
+                              mobile-width screen so nothing wraps or gets clipped. */}
+                          <span className="hidden sm:inline">&nbsp;Remaining</span>
+                        </>
+                      )}
+                    </span>
+                  </div>
+                  {/* Row 2: occasion + count merged into one line ("52nd Birthday"),
+                      with a small icon so birthdays and anniversaries read apart
+                      at a glance without parsing the text. */}
+                  <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)]">
+                    <span aria-hidden="true">{icon}</span>
+                    {occasionLabel}
                   </p>
-                  <p className="truncate text-xs text-[var(--muted)]">
-                    {item.kind === "birthday" ? "Birthday" : "Anniversary"}
-                  </p>
-                </div>
-                {item.contact.relationship && (
-                  // Neutral border/bg instead of the accent pairing: --accent is
-                  // user-customizable (Settings > Appearance) but --accent-soft is
-                  // a fixed indigo tint, so accent-colored text on it can go
-                  // low-contrast for lighter accent picks. This combo stays
-                  // readable in both themes no matter which accent is chosen.
-                  <span
-                    className="badge max-w-[84px] shrink-0 truncate"
-                    style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--fg)" }}
-                    title={item.contact.relationship}
-                  >
-                    {item.contact.relationship}
-                  </span>
-                )}
-                <span
-                  className="badge shrink-0 whitespace-nowrap"
-                  style={
-                    item.days === 0
-                      ? { background: "var(--accent)", color: "var(--accent-fg)" }
-                      : { background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--muted)" }
-                  }
-                >
-                  {item.days === 0 ? (
-                    "Today 🎉"
-                  ) : (
-                    <>
-                      {item.days} Day{item.days === 1 ? "" : "s"}
-                      {/* "Remaining" only fits alongside everything else once the
-                          row has room to breathe (sm breakpoint+) — hidden on a
-                          mobile-width screen so nothing wraps or gets clipped. */}
-                      <span className="hidden sm:inline">&nbsp;Remaining</span>
-                    </>
+                  {/* Row 3: relationship, small and muted — plain text (not a
+                      badge) so it never competes for space with the name. */}
+                  {item.contact.relationship && (
+                    <p className="mt-0.5 break-words text-xs text-[var(--muted)]">{item.contact.relationship}</p>
                   )}
-                </span>
+                </div>
               </div>
               );
             })}
