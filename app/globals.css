@@ -95,7 +95,12 @@
 html,
 body {
   height: 100%;
-   overflow-x: hidden;
+  overflow-x: hidden;
+  /* Kill the iOS/Android rubber-band bounce at the edges of the page — this
+     is what reads as the screen "jumping" when a scroll gesture overshoots
+     the top/bottom, especially once the app is installed to the home screen
+     and running full-screen with no browser chrome to absorb it. */
+  overscroll-behavior: none;
 }
 
 body {
@@ -103,6 +108,10 @@ body {
   color: var(--fg);
   font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  /* Respect the notch / home-indicator / rounded corners on edge-to-edge
+     installs (viewport-fit=cover in app/layout.tsx opts into this). */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 ::selection {
