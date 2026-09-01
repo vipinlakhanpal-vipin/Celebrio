@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Moon, Sun, Laptop, Check, Mail, MessageCircle, Bell, ShieldCheck, Users, Smartphone, Monitor, MapPin } from "lucide-react";
+import { Moon, Sun, Laptop, Check, Mail, MessageCircle, Bell, ShieldCheck, Users, Smartphone, Monitor, MapPin, Loader2 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { OccasionType } from "@/lib/types";
@@ -54,6 +54,7 @@ export function SettingsClient({
   return (
     <div className="flex flex-col gap-8 pb-6">
       <PageHeader title="Settings" subtitle="Appearance, notifications, occasions, and your account" />
+      <ProfileSection profile={profile} />
       <AppearanceSection />
       <NotificationsSection profile={profile} />
       <OccasionsSection initialOccasions={occasions} />
@@ -70,6 +71,63 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
       {subtitle && <p className="mb-3 mt-0.5 text-xs text-[var(--muted)]">{subtitle}</p>}
       <div className={subtitle ? "mt-3" : "mt-3"}>{children}</div>
     </section>
+  );
+}
+
+function ProfileSection({ profile }: { profile: Profile }) {
+  // A stored name is only real if it isn't the raw email that used to get
+  // written there as a placeholder — that case is treated as "no name set"
+  // so the field starts blank rather than pre-filled with an email address.
+  const storedName = profile.full_name && !profile.full_name.includes("@") ? profile.full_name : "";
+  const [name, setName] = useState(storedName);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function save() {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setSaving(true);
+    setSaved(false);
+    try {
+      await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ full_name: trimmed }),
+      });
+      setSaved(true);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const previewFirstName = name.trim().split(" ")[0] || "there";
+
+  return (
+    <Section title="Your profile" subtitle="How your name appears around the app">
+      <div className="card p-4">
+        <label className="mb-1 block text-xs font-medium text-[var(--muted)]">Full name</label>
+        <div className="flex gap-2">
+          <input
+            className="input flex-1"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setSaved(false);
+            }}
+            placeholder="e.g. Vipin Lakhanpal"
+          />
+          <button onClick={save} disabled={saving || !name.trim()} className="btn-primary shrink-0">
+            {saving ? <Loader2 size={16} className="animate-spin" /> : "Save"}
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-[var(--muted)]">
+          {saved
+            ? `Saved — the dashboard now greets you as "${previewFirstName}".`
+            : `We'll greet you as "${previewFirstName}" on the dashboard.`}
+        </p>
+        {profile.email && <p className="mt-1 text-[11px] text-[var(--muted)]">{profile.email}</p>}
+      </div>
+    </Section>
   );
 }
 
