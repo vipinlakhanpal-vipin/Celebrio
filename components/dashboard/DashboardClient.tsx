@@ -210,11 +210,21 @@ export function DashboardClient({
                     </span>
                   </div>
                   {/* Row 2: occasion + count merged into one line ("52nd Birthday"),
-                      with a small icon so birthdays and anniversaries read apart
-                      at a glance without parsing the text. */}
-                  <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)]">
-                    <span aria-hidden="true">{icon}</span>
+                      with a small icon on the RIGHT so birthdays and anniversaries
+                      read apart at a glance without parsing the text. Fixed
+                      amber/pink instead of --accent: --accent is user-customizable
+                      (Settings > Appearance) and a darker custom pick could go
+                      low-contrast on the dark card background — these have
+                      explicit dark: overrides so they stay readable either way. */}
+                  <p
+                    className={`mt-1 flex items-center gap-1.5 text-xs font-semibold ${
+                      item.kind === "birthday"
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-pink-600 dark:text-pink-400"
+                    }`}
+                  >
                     {occasionLabel}
+                    <span aria-hidden="true">{icon}</span>
                   </p>
                   {/* Row 3: relationship, small and muted — plain text (not a
                       badge) so it never competes for space with the name. */}
