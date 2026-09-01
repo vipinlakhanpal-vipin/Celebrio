@@ -67,36 +67,67 @@ export type Approval = {
 };
 
 export const RELATIONSHIP_OPTIONS = [
-  "Spouse / Partner",
+  "Spouse",
+  "Wife",
+  "Husband",
+  "Partner",
   "Mother",
   "Father",
+  "Son",
+  "Daughter",
   "Sibling",
-  "Child",
+  "Brother",
+  "Sister",
   "Grandparent",
+  "Grandmother",
+  "Grandfather",
+  "Grandson",
+  "Granddaughter",
   "Friend",
   "Best Friend",
   "Colleague",
   "Manager",
   "Client",
+  "Coworker",
   "Relative",
+  "Cousin",
+  "Uncle",
+  "Aunt",
+  "Niece",
+  "Nephew",
   "Neighbor",
   "Other",
 ];
 
-export const RELATIONSHIP_CATEGORIES: Record<string, string[]> = {
-    family: ["Spouse / Partner", "Mother", "Father", "Sibling", "Child", "Grandparent"],
-    friends: ["Friend", "Best Friend"],
-    colleagues: ["Colleague", "Manager", "Client"],
-    relatives: ["Relative"],
+// Every relationship a contact can have is grouped under one of the four
+// category tabs on the Contacts page. Matching is keyword-based rather than
+// an exact-string lookup, so a freely typed relationship like "Daughter" or
+// "Wife" still lands under Family even though it isn't spelled exactly like
+// one of the RELATIONSHIP_OPTIONS suggestions above — the datalist only
+// suggests values, it never restricts what someone can type.
+const RELATIONSHIP_KEYWORDS: Record<string, string[]> = {
+  family: [
+    "spouse", "wife", "husband", "partner",
+    "mother", "mom", "mum", "father", "dad", "papa", "parent",
+    "son", "daughter", "child", "kid",
+    "sibling", "brother", "sister",
+    "grandparent", "grandmother", "grandma", "grandfather", "grandpa",
+    "grandson", "granddaughter", "grandchild",
+  ],
+  friends: ["friend", "bestie", "buddy", "pal"],
+  colleagues: ["colleague", "coworker", "co-worker", "manager", "boss", "client", "teammate"],
+  relatives: ["relative", "cousin", "uncle", "aunt", "niece", "nephew", "in-law", "inlaw", "step"],
 };
 
+// Contacts whose relationship is empty, or doesn't match any of the keyword
+// groups above (e.g. "Neighbor", or something fully custom), fall through to
+// null — the Contacts page shows those under the "Others" tab.
 export function relationshipCategory(relationship: string | null | undefined): string | null {
-    if (!relationship) return null;
-    const value = relationship.trim().toLowerCase();
-    for (const key of Object.keys(RELATIONSHIP_CATEGORIES)) {
-          if (RELATIONSHIP_CATEGORIES[key].some((option) => option.toLowerCase() === value)) {
-                  return key;
-          }
-    }
-    return null;
+  const value = (relationship || "").trim().toLowerCase();
+  if (!value) return null;
+  for (const key of Object.keys(RELATIONSHIP_KEYWORDS)) {
+    const matched = RELATIONSHIP_KEYWORDS[key].some((word) => new RegExp(`\\b${word}\\b`).test(value));
+    if (matched) return key;
+  }
+  return null;
 }
