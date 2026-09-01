@@ -180,9 +180,14 @@ export function DashboardClient({
                   </p>
                 </div>
                 {item.contact.relationship && (
+                  // Neutral border/bg instead of the accent pairing: --accent is
+                  // user-customizable (Settings > Appearance) but --accent-soft is
+                  // a fixed indigo tint, so accent-colored text on it can go
+                  // low-contrast for lighter accent picks. This combo stays
+                  // readable in both themes no matter which accent is chosen.
                   <span
                     className="badge max-w-[84px] shrink-0 truncate"
-                    style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
+                    style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--fg)" }}
                     title={item.contact.relationship}
                   >
                     {item.contact.relationship}
