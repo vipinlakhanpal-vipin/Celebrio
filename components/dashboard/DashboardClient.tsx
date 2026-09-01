@@ -166,7 +166,7 @@ export function DashboardClient({
         ) : (
           <div className="card divide-y divide-[var(--border)]">
             {upcoming.map((item) => (
-              <div key={`${item.contact.id}-${item.kind}`} className="flex items-center gap-3 p-3">
+              <div key={`${item.contact.id}-${item.kind}`} className="flex items-center gap-2 p-3">
                 <span
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
                   style={{ background: `linear-gradient(135deg, ${gradientFor(item.contact.full_name).join(",")})` }}
@@ -175,19 +175,38 @@ export function DashboardClient({
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-[var(--fg)]">{item.contact.full_name}</p>
-                  <p className="text-xs text-[var(--muted)]">
-                    {item.contact.relationship || "Contact"} · {item.kind === "birthday" ? "Birthday" : "Anniversary"}
+                  <p className="truncate text-xs text-[var(--muted)]">
+                    {item.kind === "birthday" ? "Birthday" : "Anniversary"}
                   </p>
                 </div>
+                {item.contact.relationship && (
+                  <span
+                    className="badge max-w-[84px] shrink-0 truncate"
+                    style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
+                    title={item.contact.relationship}
+                  >
+                    {item.contact.relationship}
+                  </span>
+                )}
                 <span
-                  className="badge shrink-0"
+                  className="badge shrink-0 whitespace-nowrap"
                   style={
                     item.days === 0
                       ? { background: "var(--accent)", color: "var(--accent-fg)" }
                       : { background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--muted)" }
                   }
                 >
-                  {item.days === 0 ? "Today 🎉" : `${item.days}d`}
+                  {item.days === 0 ? (
+                    "Today 🎉"
+                  ) : (
+                    <>
+                      {item.days} Day{item.days === 1 ? "" : "s"}
+                      {/* "Remaining" only fits alongside everything else once the
+                          row has room to breathe (sm breakpoint+) — hidden on a
+                          mobile-width screen so nothing wraps or gets clipped. */}
+                      <span className="hidden sm:inline">&nbsp;Remaining</span>
+                    </>
+                  )}
                 </span>
               </div>
             ))}
