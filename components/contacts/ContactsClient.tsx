@@ -16,6 +16,7 @@ const CATEGORY_TABS = [
   { key: "friends", label: "Friends" },
   { key: "colleagues", label: "Colleagues" },
   { key: "relatives", label: "Relatives" },
+  { key: "others", label: "Others" },
   ];
 
 export function ContactsClient({ initialContacts }: { initialContacts: Contact[] }) {
@@ -35,7 +36,13 @@ export function ContactsClient({ initialContacts }: { initialContacts: Contact[]
             (c.relationship || "").toLowerCase().includes(q)
         );
     if (activeTab !== "all") {
-      list = list.filter((c) => relationshipCategory(c.relationship) === activeTab);
+      list = list.filter((c) => {
+        const category = relationshipCategory(c.relationship);
+        // "Others" catches contacts with no relationship set, plus anything
+        // typed in that doesn't match Family/Friends/Colleagues/Relatives —
+        // so no contact ever silently disappears from every category tab.
+        return activeTab === "others" ? category === null : category === activeTab;
+      });
     }
     return [...list].sort((a, b) => {
       const da = a.date_of_birth ? daysUntilNextOccurrence(a.date_of_birth) : 9999;
