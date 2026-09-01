@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Users, CalendarHeart, Sparkles as SparklesIcon, X } from "lucide-react";
 import { Approval, Contact, OccasionPrompt } from "@/lib/types";
-import { daysUntilNextOccurrence, formatFriendlyDate } from "@/lib/date-utils";
+import { daysUntilNextOccurrence, formatFriendlyDate, nextOccurrenceDate, ordinal, turningAge } from "@/lib/date-utils";
 import { gradientFor, initials } from "@/components/contacts/ContactCard";
 import { PageHeader } from "@/components/PageHeader";
 import { OccasionPickerModal } from "@/components/dashboard/OccasionPickerModal";
@@ -165,7 +165,12 @@ export function DashboardClient({
           </div>
         ) : (
           <div className="card divide-y divide-[var(--border)]">
-            {upcoming.map((item) => (
+            {upcoming.map((item) => {
+              // null for the "unknown year" placeholder some dates use — in
+              // that case we genuinely don't know the age/anniversary count,
+              // so nothing is shown rather than a misleading number.
+              const age = turningAge(item.date, nextOccurrenceDate(item.date));
+              return (
               <div key={`${item.contact.id}-${item.kind}`} className="flex items-center gap-2 p-3">
                 <span
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
@@ -174,7 +179,15 @@ export function DashboardClient({
                   {initials(item.contact.full_name)}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-[var(--fg)]">{item.contact.full_name}</p>
+                  <p className="truncate text-sm font-medium text-[var(--fg)]">
+                    {item.contact.full_name}
+                    {age !== null && (
+                      <span className="font-normal text-[var(--muted)]">
+                        {" "}
+                        · {item.kind === "birthday" ? `Turning ${age}` : `${ordinal(age)} Anniversary`}
+                      </span>
+                    )}
+                  </p>
                   <p className="truncate text-xs text-[var(--muted)]">
                     {item.kind === "birthday" ? "Birthday" : "Anniversary"}
                   </p>
@@ -214,7 +227,8 @@ export function DashboardClient({
                   )}
                 </span>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
