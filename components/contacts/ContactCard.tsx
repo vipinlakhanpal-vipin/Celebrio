@@ -1,7 +1,7 @@
 "use client";
 
 import { Contact } from "@/lib/types";
-import { daysUntilNextOccurrence, formatFriendlyDate } from "@/lib/date-utils";
+import { daysUntilNextOccurrence, formatFriendlyDate, nextOccurrenceDate, ordinal, turningAge } from "@/lib/date-utils";
 import { AlertCircle, Mail, Phone } from "lucide-react";
 
 const AVATAR_GRADIENTS = [
@@ -30,6 +30,14 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
   const [from, to] = gradientFor(contact.full_name);
   const days = contact.date_of_birth ? daysUntilNextOccurrence(contact.date_of_birth) : null;
   const annDays = contact.anniversary_date ? daysUntilNextOccurrence(contact.anniversary_date) : null;
+  // null when the stored date uses the "unknown year" placeholder — nothing
+  // to show in that case, since we don't actually know how old they're turning.
+  const birthdayAge = contact.date_of_birth
+    ? turningAge(contact.date_of_birth, nextOccurrenceDate(contact.date_of_birth))
+    : null;
+  const anniversaryYears = contact.anniversary_date
+    ? turningAge(contact.anniversary_date, nextOccurrenceDate(contact.anniversary_date))
+    : null;
 
   return (
     <button
@@ -73,13 +81,21 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
 
       <div className="flex flex-col gap-1 text-xs text-[var(--muted)]">
         {contact.date_of_birth ? (
-          <span>Birthday: {formatFriendlyDate(contact.date_of_birth)}</span>
+          <span>
+            Birthday: {formatFriendlyDate(contact.date_of_birth)}
+            {birthdayAge !== null && ` · Turning ${birthdayAge}`}
+          </span>
         ) : (
           <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
             <AlertCircle size={12} /> No birthday on file — tap to add
           </span>
         )}
-        {contact.anniversary_date && <span>Anniversary: {formatFriendlyDate(contact.anniversary_date)}</span>}
+        {contact.anniversary_date && (
+          <span>
+            Anniversary: {formatFriendlyDate(contact.anniversary_date)}
+            {anniversaryYears !== null && ` · ${ordinal(anniversaryYears)} Anniversary`}
+          </span>
+        )}
         {contact.email && (
           <span className="flex items-center gap-1 truncate">
             <Mail size={12} /> {contact.email}
