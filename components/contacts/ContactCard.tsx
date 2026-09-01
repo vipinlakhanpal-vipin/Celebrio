@@ -46,7 +46,15 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-[var(--fg)]">{contact.full_name}</p>
           {contact.relationship && (
-            <span className="badge mt-1" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+            // Neutral border/bg instead of the accent pairing: --accent is
+            // user-customizable (Settings > Appearance) but --accent-soft is
+            // a fixed indigo tint, so accent-colored text on it can go
+            // low-contrast for lighter accent picks. This combo stays
+            // readable in both themes no matter which accent is chosen.
+            <span
+              className="badge mt-1"
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--fg)" }}
+            >
               {contact.relationship}
             </span>
           )}
