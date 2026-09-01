@@ -100,7 +100,14 @@ function ProfileSection({ profile }: { profile: Profile }) {
     }
   }
 
-  const previewFirstName = name.trim().split(" ")[0] || "there";
+  // While no name has been typed/saved yet, preview the same fallback the
+  // dashboard actually uses today (the email's local part, title-cased) —
+  // not a generic "there" placeholder that doesn't match what's shown.
+  const emailFallback = profile.email
+    ? profile.email.split("@")[0].split(/[._-]+/)[0]
+    : "there";
+  const titleCased = emailFallback ? emailFallback.charAt(0).toUpperCase() + emailFallback.slice(1) : "there";
+  const previewFirstName = name.trim().split(" ")[0] || titleCased;
 
   return (
     <Section title="Your profile" subtitle="How your name appears around the app">
