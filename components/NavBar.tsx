@@ -141,24 +141,46 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
       </header>
 
       {/* ---------- Mobile top strip (brand only) ---------- */}
-      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--bg)]/90 px-4 backdrop-blur md:hidden">
+      <header
+        className="sticky top-0 z-40 flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg)]/90 px-4 backdrop-blur md:hidden"
+        style={{ height: "calc(3.5rem + env(safe-area-inset-top))", paddingTop: "env(safe-area-inset-top)" }}
+      >
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold text-[var(--fg)]">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg text-white gradient-hero">
             <Cake size={16} />
           </span>
           <span className="font-display text-[15px] font-semibold">Celebrio</span>
         </Link>
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="btn-ghost"
-          aria-label="Toggle theme"
-        >
-          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => window.location.reload()}
+            className="btn-ghost relative !px-2 text-xs font-medium text-[var(--muted)]"
+            title={updateAvailable ? `New version available (v${latestVersion}) — tap to refresh` : `Celebrio v${APP_VERSION}`}
+          >
+            v{APP_VERSION}
+            {updateAvailable && (
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-red-500" />
+            )}
+          </button>
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="btn-ghost"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
       </header>
 
       {/* ---------- Mobile bottom nav ---------- */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg)]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg)]/95 backdrop-blur md:hidden"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          paddingLeft: "env(safe-area-inset-left)",
+          paddingRight: "env(safe-area-inset-right)",
+        }}
+      >
         <div className="mx-auto flex max-w-md items-stretch justify-between px-2">
           {NAV_ITEMS.map((item) => {
             const active = pathname.startsWith(item.href);
