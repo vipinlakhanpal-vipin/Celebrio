@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Users, CalendarHeart, Sparkles as SparklesIcon, X, Home, Briefcase, Heart, UserCircle2 } from "lucide-react";
+import { Users, CalendarHeart, CheckCircle2, Sparkles as SparklesIcon, X, Home, Briefcase, Heart, UserCircle2 } from "lucide-react";
 import { Approval, Contact, OccasionPrompt, relationshipCategory } from "@/lib/types";
 import { daysUntilNextOccurrence, formatFriendlyDate, nextOccurrenceDate, ordinal, turningAge } from "@/lib/date-utils";
 import { gradientFor, initials } from "@/components/contacts/ContactCard";
@@ -73,12 +73,15 @@ export function DashboardClient({
     return counts;
   }, [contacts]);
 
+  // Each category gets its own gentle tint (same family used for the
+  // "Review" badge elsewhere) so Family/Friends/Colleagues/Relatives/Others
+  // read apart at a glance instead of five identical gray chips.
   const CATEGORIES = [
-    { key: "family", label: "Family", icon: Home },
-    { key: "friends", label: "Friends", icon: Users },
-    { key: "colleagues", label: "Colleagues", icon: Briefcase },
-    { key: "relatives", label: "Relatives", icon: Heart },
-    { key: "others", label: "Others", icon: UserCircle2 },
+    { key: "family", label: "Family", icon: Home, className: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/15" },
+    { key: "friends", label: "Friends", icon: Users, className: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/15" },
+    { key: "colleagues", label: "Colleagues", icon: Briefcase, className: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/15" },
+    { key: "relatives", label: "Relatives", icon: Heart, className: "text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-500/15" },
+    { key: "others", label: "Others", icon: UserCircle2, className: "text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-500/15" },
   ] as const;
 
   async function dismissPrompt(id: string) {
@@ -121,18 +124,34 @@ export function DashboardClient({
         </div>
       )}
 
+      {/* Each tile gets its own solid gradient instead of the flat/gray
+          card look — Upcoming (blue), To approve (violet), Contacts
+          (emerald) — so the three numbers that matter most are the first
+          thing your eye lands on. */}
       <div className="mb-6 grid grid-cols-3 gap-3">
-        <div className="card p-4 text-center">
-          <p className="font-display text-2xl font-bold text-[var(--fg)]">{upcomingWithin30}</p>
-          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">Upcoming</p>
+        <div
+          className="rounded-2xl p-4 text-center shadow-md"
+          style={{ background: "linear-gradient(150deg, #3d7cf7 0%, #2657c9 100%)" }}
+        >
+          <CalendarHeart size={16} className="mx-auto mb-1 text-white/85" />
+          <p className="font-display text-2xl font-bold text-white">{upcomingWithin30}</p>
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">Upcoming</p>
         </div>
-        <div className="card p-4 text-center" style={{ background: "var(--accent-soft)", borderColor: "transparent" }}>
-          <p className="font-display text-2xl font-bold text-[var(--accent)]">{pendingApprovals.length}</p>
-          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">To approve</p>
+        <div
+          className="rounded-2xl p-4 text-center shadow-md"
+          style={{ background: "linear-gradient(150deg, #8b5cf6 0%, #6431e0 100%)" }}
+        >
+          <CheckCircle2 size={16} className="mx-auto mb-1 text-white/85" />
+          <p className="font-display text-2xl font-bold text-white">{pendingApprovals.length}</p>
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">To approve</p>
         </div>
-        <div className="card p-4 text-center">
-          <p className="font-display text-2xl font-bold text-[var(--fg)]">{contactCount}</p>
-          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">Contacts</p>
+        <div
+          className="rounded-2xl p-4 text-center shadow-md"
+          style={{ background: "linear-gradient(150deg, #12b981 0%, #0a8f63 100%)" }}
+        >
+          <Users size={16} className="mx-auto mb-1 text-white/85" />
+          <p className="font-display text-2xl font-bold text-white">{contactCount}</p>
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">Contacts</p>
         </div>
       </div>
 
@@ -140,15 +159,15 @@ export function DashboardClient({
         <div className="mb-6">
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Categories</h2>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {CATEGORIES.map(({ key, label, icon: Icon }) => (
+            {CATEGORIES.map(({ key, label, icon: Icon, className }) => (
               <Link
                 key={key}
                 href={`/contacts?tab=${key}`}
-                className="card flex shrink-0 items-center gap-2 px-3.5 py-2.5 transition-transform hover:-translate-y-0.5"
+                className={`flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2.5 transition-transform hover:-translate-y-0.5 ${className}`}
               >
-                <Icon size={15} className="text-[var(--accent)]" />
-                <span className="text-sm font-medium text-[var(--fg)]">{label}</span>
-                <span className="text-xs font-semibold text-[var(--muted)]">{categoryCounts[key]}</span>
+                <Icon size={15} />
+                <span className="text-sm font-medium">{label}</span>
+                <span className="text-xs font-semibold opacity-70">{categoryCounts[key]}</span>
               </Link>
             ))}
           </div>
