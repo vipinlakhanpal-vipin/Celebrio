@@ -131,30 +131,42 @@ export function DashboardClient({
           card look — Upcoming (blue), To approve (violet), Contacts
           (emerald) — so the three numbers that matter most are the first
           thing your eye lands on. */}
-      <div className="mb-6 grid grid-cols-3 gap-3">
+      {/* Smaller footprint on phones (tighter padding, smaller number/label)
+          than on desktop — three cards at full desktop size were crowding
+          out everything below the fold on a phone screen. */}
+      <div className="mb-6 grid grid-cols-3 gap-2 sm:gap-3">
         <div
-          className="rounded-2xl p-4 text-center shadow-md"
+          className="rounded-2xl p-2.5 text-center shadow-md sm:p-4"
           style={{ background: "linear-gradient(150deg, #3d7cf7 0%, #2657c9 100%)" }}
         >
-          <CalendarHeart size={16} className="mx-auto mb-1 text-white/85" />
-          <p className="font-display text-2xl font-bold text-white">{upcomingWithin30}</p>
-          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">Upcoming</p>
+          <CalendarHeart size={14} className="mx-auto mb-1 text-white/85 sm:hidden" />
+          <CalendarHeart size={16} className="mx-auto mb-1 hidden text-white/85 sm:block" />
+          <p className="font-display text-lg font-bold text-white sm:text-2xl">{upcomingWithin30}</p>
+          <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
+            Upcoming
+          </p>
         </div>
         <div
-          className="rounded-2xl p-4 text-center shadow-md"
+          className="rounded-2xl p-2.5 text-center shadow-md sm:p-4"
           style={{ background: "linear-gradient(150deg, #8b5cf6 0%, #6431e0 100%)" }}
         >
-          <CheckCircle2 size={16} className="mx-auto mb-1 text-white/85" />
-          <p className="font-display text-2xl font-bold text-white">{pendingApprovals.length}</p>
-          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">To approve</p>
+          <CheckCircle2 size={14} className="mx-auto mb-1 text-white/85 sm:hidden" />
+          <CheckCircle2 size={16} className="mx-auto mb-1 hidden text-white/85 sm:block" />
+          <p className="font-display text-lg font-bold text-white sm:text-2xl">{pendingApprovals.length}</p>
+          <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
+            To approve
+          </p>
         </div>
         <div
-          className="rounded-2xl p-4 text-center shadow-md"
+          className="rounded-2xl p-2.5 text-center shadow-md sm:p-4"
           style={{ background: "linear-gradient(150deg, #12b981 0%, #0a8f63 100%)" }}
         >
-          <Users size={16} className="mx-auto mb-1 text-white/85" />
-          <p className="font-display text-2xl font-bold text-white">{contactCount}</p>
-          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">Contacts</p>
+          <Users size={14} className="mx-auto mb-1 text-white/85 sm:hidden" />
+          <Users size={16} className="mx-auto mb-1 hidden text-white/85 sm:block" />
+          <p className="font-display text-lg font-bold text-white sm:text-2xl">{contactCount}</p>
+          <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
+            Contacts
+          </p>
         </div>
       </div>
 
