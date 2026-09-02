@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { clsx } from "clsx";
-import { Plus, Upload, Search, Users } from "lucide-react";
+import { Plus, Upload, Search, Users, CalendarHeart, CheckCircle2 } from "lucide-react";
 import { Contact, relationshipCategory } from "@/lib/types";
 import { daysUntilNextOccurrence } from "@/lib/date-utils";
+import { CATEGORY_COLORS } from "@/lib/category-colors";
 import { ContactCard } from "@/components/contacts/ContactCard";
 import { ContactModal } from "@/components/contacts/ContactModal";
 import { UploadModal } from "@/components/contacts/UploadModal";
@@ -22,11 +23,15 @@ const CATEGORY_TABS = [
 export function ContactsClient({
   initialContacts,
   initialTab,
+  pendingApprovalCount,
 }: {
   initialContacts: Contact[];
   // Lets a link from elsewhere (e.g. the category chips on the Dashboard)
   // land directly on a filtered tab instead of always opening on "All".
   initialTab?: string;
+  // Same "To approve" number shown on the Dashboard's stat tile — fetched
+  // server-side there and here so both pages always agree.
+  pendingApprovalCount: number;
 }) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [query, setQuery] = useState("");
@@ -34,6 +39,22 @@ export function ContactsClient({
   const [showUpload, setShowUpload] = useState(false);
   const [activeTab, setActiveTab] = useState(
     CATEGORY_TABS.some((t) => t.key === initialTab) ? initialTab! : "all"
+  );
+
+  // Same "days <= 30" formula as the Dashboard's Upcoming tile, computed
+  // from this page's own contacts list so the number here matches what's
+  // shown there.
+  const upcomingWithin30 = useMemo(
+    () =>
+      contacts
+        .flatMap((c) => {
+          const out: number[] = [];
+          if (c.date_of_birth) out.push(daysUntilNextOccurrence(c.date_of_birth));
+          if (c.anniversary_date) out.push(daysUntilNextOccurrence(c.anniversary_date));
+          return out;
+        })
+        .filter((d) => d <= 30).length,
+    [contacts]
   );
 
   const filtered = useMemo(() => {
@@ -97,27 +118,68 @@ export function ContactsClient({
         }
       />
 
+      {/* Same three stat tiles as the Dashboard, same colors, same numbers —
+          so glancing at either page tells the same story. */}
+      <div className="mb-5 grid grid-cols-3 gap-3">
+        <div
+          className="rounded-2xl p-4 text-center shadow-md"
+          style={{ background: "linear-gradient(150deg, #3d7cf7 0%, #2657c9 100%)" }}
+        >
+          <CalendarHeart size={16} className="mx-auto mb-1 text-white/85" />
+          <p className="font-display text-2xl font-bold text-white">{upcomingWithin30}</p>
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">Upcoming</p>
+        </div>
+        <div
+          className="rounded-2xl p-4 text-center shadow-md"
+          style={{ background: "linear-gradient(150deg, #8b5cf6 0%, #6431e0 100%)" }}
+        >
+          <CheckCircle2 size={16} className="mx-auto mb-1 text-white/85" />
+          <p className="font-display text-2xl font-bold text-white">{pendingApprovalCount}</p>
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">To approve</p>
+        </div>
+        <div
+          className="rounded-2xl p-4 text-center shadow-md"
+          style={{ background: "linear-gradient(150deg, #12b981 0%, #0a8f63 100%)" }}
+        >
+          <Users size={16} className="mx-auto mb-1 text-white/85" />
+          <p className="font-display text-2xl font-bold text-white">{contacts.length}</p>
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-white/75">Contacts</p>
+        </div>
+      </div>
+
       {/* Wrap onto multiple lines instead of scrolling horizontally — a
           narrow phone screen can't fit all six tabs on one row, and a
           scroll-only row gave no visual hint that "Relatives"/"Others"
           existed off to the right. Wrapping keeps every tab visible and
-          tappable without a swipe someone has to discover first. */}
+          tappable without a swipe someone has to discover first.
+
+          "All" stays the neutral accent-colored tab it always was; each
+          category tab picks up the same color used for it everywhere else
+          (Dashboard chips included) — solid fill when selected, a colored
+          outline when not, so all six stay easy to tell apart even before
+          you tap one. */}
       <div className="mb-4 flex flex-wrap gap-2">
-        {CATEGORY_TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={clsx(
-              "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
-              activeTab === t.key
-                ? "text-[var(--accent-fg)]"
-                : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--fg)]"
-            )}
-            style={activeTab === t.key ? { background: "var(--accent)" } : undefined}
-          >
-            {t.label}
-          </button>
-        ))}
+        {CATEGORY_TABS.map((t) => {
+          const colors = CATEGORY_COLORS[t.key];
+          const active = activeTab === t.key;
+          return (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              className={clsx(
+                "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
+                active
+                  ? "text-white"
+                  : colors
+                    ? `border bg-transparent ${colors.outlineClassName}`
+                    : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--fg)]"
+              )}
+              style={active ? { background: colors ? colors.gradient : "var(--accent)" } : undefined}
+            >
+              {t.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="relative mb-5 max-w-sm">
