@@ -22,6 +22,7 @@ export function ContactModal({
     anniversary_date: contact?.anniversary_date || "",
     email: contact?.email || "",
     phone: contact?.phone || "",
+    address: contact?.address || "",
     notes: contact?.notes || "",
   });
   const [saving, setSaving] = useState(false);
@@ -147,6 +148,16 @@ export function ContactModal({
                 placeholder="+9715xxxxxxx"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs font-medium text-[var(--muted)]">Address</label>
+            <input
+              className="input"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              placeholder="123 Palm St, Dubai, UAE"
+            />
           </div>
 
           <div>
