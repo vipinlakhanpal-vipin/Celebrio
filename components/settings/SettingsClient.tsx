@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Moon, Sun, Laptop, Check, Mail, MessageCircle, Bell, ShieldCheck, Users, Smartphone, Monitor, MapPin, Loader2 } from "lucide-react";
+import { Moon, Sun, Laptop, Check, Mail, MessageCircle, Bell, ShieldCheck, Users, Smartphone, Monitor, MapPin, Loader2, Trash2 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { OccasionType } from "@/lib/types";
@@ -354,13 +354,26 @@ function ActivitySection({
   );
 }
 
+type AdminSignIn = {
+  id: string;
+  user_id: string;
+  user_label: string;
+  signed_in_at: string;
+  city: string | null;
+  country: string | null;
+  device_type: string | null;
+  sign_in_count: number;
+  events_last_7d: number;
+};
+
 function AdminSection() {
   const [stats, setStats] = useState<{
     totalUsers: number;
     activeUsersLast7Days: number;
     usagePercent: number;
-    signIns: { id: string; user_label: string; signed_in_at: string; city: string | null; country: string | null; device_type: string | null }[];
+    signIns: AdminSignIn[];
   } | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/stats")
@@ -368,6 +381,36 @@ function AdminSection() {
       .then(setStats)
       .catch(() => {});
   }, []);
+
+  async function deleteUser(s: AdminSignIn) {
+    const confirmed = window.confirm(
+      `Permanently delete ${s.user_label}? This removes their account and all of their data (contacts, approvals, messages) and can't be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(s.user_id);
+    try {
+      const res = await fetch(`/api/admin/users/${s.user_id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        alert(body.error || "Couldn't delete this user.");
+        return;
+      }
+      setStats((prev) =>
+        prev
+          ? {
+              ...prev,
+              totalUsers: Math.max(0, prev.totalUsers - 1),
+              signIns: prev.signIns.filter((row) => row.user_id !== s.user_id),
+            }
+          : prev
+      );
+    } catch {
+      alert("Couldn't delete this user — please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   if (!stats) return null;
 
@@ -391,21 +434,50 @@ function AdminSection() {
         </div>
       </div>
 
-      <div className="card max-h-80 divide-y divide-[var(--border)] overflow-y-auto">
+      {/* One row per user (deduped from the raw login-event log — signing
+          in twice used to show as two rows), showing their latest sign-in
+          date+time and their own recent-activity count, plus a delete
+          button that removes the account and all of its data. */}
+      <div className="card max-h-96 divide-y divide-[var(--border)] overflow-y-auto">
         <div className="flex items-center gap-2 p-3 text-xs font-semibold text-[var(--muted)]">
-          <ShieldCheck size={13} /> Recent sign-ins across all users
+          <ShieldCheck size={13} /> All users — latest sign-in
         </div>
         {stats.signIns.map((s) => (
-          <div key={s.id} className="flex items-center gap-3 p-3 text-sm">
-            {s.device_type === "mobile" ? <Smartphone size={14} className="text-[var(--muted)]" /> : <Monitor size={14} className="text-[var(--muted)]" />}
-            <span className="flex-1 truncate text-[var(--fg)]">{s.user_label}</span>
-            <span className="text-xs text-[var(--muted)]">
-              {new Date(s.signed_in_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-            </span>
-            <span className="flex items-center gap-1 text-xs text-[var(--muted)]">
-              <MapPin size={11} />
-              {[s.city, s.country].filter(Boolean).join(", ") || "—"}
-            </span>
+          <div key={s.user_id} className="flex items-center gap-3 p-3 text-sm">
+            {s.device_type === "mobile" ? <Smartphone size={14} className="shrink-0 text-[var(--muted)]" /> : <Monitor size={14} className="shrink-0 text-[var(--muted)]" />}
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[var(--fg)]">{s.user_label}</p>
+              <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[var(--muted)]">
+                <span>
+                  Last signed in{" "}
+                  {new Date(s.signed_in_at).toLocaleString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+                {s.sign_in_count > 1 && <span>· {s.sign_in_count} sign-ins</span>}
+                <span className="flex items-center gap-1">
+                  <MapPin size={11} />
+                  {[s.city, s.country].filter(Boolean).join(", ") || "—"}
+                </span>
+                {s.events_last_7d > 0 ? (
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">Active this week</span>
+                ) : (
+                  <span>No activity this week</span>
+                )}
+              </p>
+            </div>
+            <button
+              onClick={() => deleteUser(s)}
+              disabled={deletingId === s.user_id}
+              className="btn-ghost shrink-0 !px-2 text-red-600 hover:!bg-red-50 dark:text-red-400 dark:hover:!bg-red-500/10"
+              title={`Delete ${s.user_label}`}
+              aria-label={`Delete ${s.user_label}`}
+            >
+              {deletingId === s.user_id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+            </button>
           </div>
         ))}
       </div>
