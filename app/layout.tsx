@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit, Manrope } from "next/font/google";
+import { Outfit, Manrope, Fraunces } from "next/font/google";
 import "./globals.css";
 import { NO_FLASH_SCRIPT } from "@/components/ThemeProvider";
 
@@ -13,6 +13,16 @@ const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+});
+
+// Used only for the "Celebrio" wordmark itself — a warm serif so the brand
+// name can carry the whole logo without an icon, the way a fine stationer's
+// name-only mark works.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -36,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${outfit.variable} ${manrope.variable} h-full antialiased`}
+      className={`${outfit.variable} ${manrope.variable} ${fraunces.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
