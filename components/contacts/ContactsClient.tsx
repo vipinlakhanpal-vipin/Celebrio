@@ -19,12 +19,22 @@ const CATEGORY_TABS = [
   { key: "others", label: "Others" },
   ];
 
-export function ContactsClient({ initialContacts }: { initialContacts: Contact[] }) {
+export function ContactsClient({
+  initialContacts,
+  initialTab,
+}: {
+  initialContacts: Contact[];
+  // Lets a link from elsewhere (e.g. the category chips on the Dashboard)
+  // land directly on a filtered tab instead of always opening on "All".
+  initialTab?: string;
+}) {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<Contact | null | "new">(null);
   const [showUpload, setShowUpload] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState(
+    CATEGORY_TABS.some((t) => t.key === initialTab) ? initialTab! : "all"
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -94,18 +104,23 @@ export function ContactsClient({ initialContacts }: { initialContacts: Contact[]
           tappable without a swipe someone has to discover first. */}
       <div className="mb-4 flex flex-wrap gap-2">
         {CATEGORY_TABS.map((t) => (
-      <button
-        key={t.key}
-        onClick={() => setActiveTab(t.key)}
-        className={clsx("shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors", activeTab === t.key ? "text-[var(--accent-fg)]" : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--fg)]")}
-        style={activeTab === t.key ? { background: "var(--accent)" } : undefined}
-        >
-        {t.label}
-      </button>
-      ))}
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key)}
+            className={clsx(
+              "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
+              activeTab === t.key
+                ? "text-[var(--accent-fg)]"
+                : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--fg)]"
+            )}
+            style={activeTab === t.key ? { background: "var(--accent)" } : undefined}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
-    
-  <div className="relative mb-5 max-w-sm">
+
+      <div className="relative mb-5 max-w-sm">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
         <input
           className="input pl-9"
