@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
       anniversary_date: body.anniversary_date || null,
       email: body.email || null,
       phone: body.phone || null,
+      address: body.address || null,
       notes: body.notes || null,
       source: "manual",
     })
