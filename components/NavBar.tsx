@@ -167,7 +167,8 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
             </button>
             <button
               onClick={() => window.location.reload()}
-              className="btn-ghost relative !px-2.5 text-xs font-bold text-amber-600 dark:text-amber-400"
+              className="btn-ghost relative !px-2.5 text-xs font-extrabold text-amber-600 dark:text-amber-400"
+              style={{ color: theme === "dark" ? "#fbbf24" : "#b45309" }}
               title={updateAvailable ? `New version available (v${latestVersion}) — click to refresh` : `Celebrio v${APP_VERSION}`}
             >
               v{APP_VERSION}
@@ -205,7 +206,8 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
         <div className="flex items-center gap-1">
           <button
             onClick={() => window.location.reload()}
-            className="btn-ghost relative !px-2 text-xs font-bold text-amber-600 dark:text-amber-400"
+            className="btn-ghost relative !px-2 text-xs font-extrabold text-amber-600 dark:text-amber-400"
+            style={{ color: theme === "dark" ? "#fbbf24" : "#b45309" }}
             title={updateAvailable ? `New version available (v${latestVersion}) — tap to refresh` : `Celebrio v${APP_VERSION}`}
           >
             v{APP_VERSION}
