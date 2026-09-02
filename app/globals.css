@@ -90,7 +90,7 @@
 
 /* The "Celebrio" wordmark — a warm serif so the brand name alone can carry
    the logo, no icon needed. The dot above the "i" is drawn separately (see
-   components/Wordmark.tsx) as a small gold-to-rose spark instead of using this font's own dot. */
+   NavBar.tsx) as a small gold-to-rose spark instead of using this font's own dot. */
 .font-wordmark {
   font-family: var(--font-fraunces), Georgia, "Times New Roman", serif;
   font-optical-sizing: auto;
@@ -109,6 +109,18 @@ body {
      the top/bottom, especially once the app is installed to the home screen
      and running full-screen with no browser chrome to absorb it. */
   overscroll-behavior: none;
+}
+
+/* Every text size in the app is set with Tailwind's rem-based utilities, so
+   bumping the root font-size scales all of them together — roughly +2px at
+   the sizes used most (11–14px text), without having to touch every
+   className individually. Scoped to the same <768px breakpoint the rest of
+   the app already treats as "mobile" (md:hidden / md:block elsewhere), so
+   desktop/tablet sizing is untouched. */
+@media (max-width: 767px) {
+  html {
+    font-size: 18px;
+  }
 }
 
 body {
