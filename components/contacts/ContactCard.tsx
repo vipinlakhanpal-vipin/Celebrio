@@ -161,8 +161,15 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
           </span>
         )}
         {contact.address && (
-          <span className="flex items-center gap-1.5 truncate">
-            <MapPin size={12} className="shrink-0" /> <span className="truncate">{contact.address}</span>
+          // Unlike the single-line fields above, address is allowed to wrap
+          // instead of truncating — items-start (not items-center) keeps the
+          // pin icon pinned to the first line rather than drifting to the
+          // vertical center once the text wraps to 2-3 lines. No line-clamp
+          // here on purpose: the card isn't a fixed height, so it just grows
+          // to fit however long the address runs.
+          <span className="flex items-start gap-1.5">
+            <MapPin size={12} className="mt-0.5 shrink-0" />
+            <span className="break-words">{contact.address}</span>
           </span>
         )}
       </div>
