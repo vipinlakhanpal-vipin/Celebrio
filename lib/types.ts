@@ -7,6 +7,7 @@ export type Contact = {
   anniversary_date: string | null; // YYYY-MM-DD
   email: string | null;
   phone: string | null;
+  address: string | null;
   notes: string | null;
   photo_url: string | null;
   source: "manual" | "csv" | "xlsx";
