@@ -147,11 +147,9 @@ export function ContactsClient({
         </div>
       </div>
 
-      {/* Wrap onto multiple lines instead of scrolling horizontally — a
-          narrow phone screen can't fit all six tabs on one row, and a
-          scroll-only row gave no visual hint that "Relatives"/"Others"
-          existed off to the right. Wrapping keeps every tab visible and
-          tappable without a swipe someone has to discover first.
+      {/* One flowing, horizontally-scrolling row — same treatment as the
+          category chips on the Home page — instead of wrapping onto a
+          second line.
 
           Every tab is always the same solid color used for it everywhere
           else (Dashboard chips included) — not just when it's the active
@@ -159,7 +157,7 @@ export function ContactsClient({
           active tab is picked out with full opacity + a ring in its own
           color; the rest dim slightly so the current filter still reads
           clearly at a glance. */}
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {CATEGORY_TABS.map((t) => {
           const colors = CATEGORY_COLORS[t.key];
           const active = activeTab === t.key;
