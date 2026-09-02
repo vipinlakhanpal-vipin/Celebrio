@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { isoDaysAgo } from "@/lib/date-utils";
 
 /**
  * App-wide analytics for the account marked profiles.is_admin = true
@@ -18,6 +19,7 @@ export async function GET() {
   if (!profile?.is_admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const admin = await createAdminClient();
+  const thirtyDaysAgoIso = isoDaysAgo(30);
 
   const [{ data: profiles, count: totalUsers }, { data: signIns }, { data: usageEvents }] = await Promise.all([
     admin.from("profiles").select("id, email, full_name, created_at", { count: "exact" }),
@@ -26,28 +28,45 @@ export async function GET() {
       .select("id, user_id, signed_in_at, city, region, country, device_type, ip_address")
       .order("signed_in_at", { ascending: false })
       .limit(200),
-    admin.from("usage_events").select("user_id, occurred_at").order("occurred_at", { ascending: false }).limit(2000),
+    // Scoped to the last 30 days (not just "the most recent 2000 events
+    // overall") so the per-user usage % below uses the same window as the
+    // personal "Active days (30d)" tile in Settings, no matter how many
+    // users or events there are.
+    admin.from("usage_events").select("user_id, occurred_at").gte("occurred_at", thirtyDaysAgoIso),
   ]);
 
-  const emailByUser = new Map((profiles || []).map((p) => [p.id, p.email || p.full_name || p.id.slice(0, 8)]));
+  // First name for the admin list — falls back to the email's local part,
+  // title-cased, same fallback used everywhere else a name might be unset,
+  // so no row ever shows blank.
+  function firstNameFor(p: { email: string | null; full_name: string | null }) {
+    const stored = p.full_name && !p.full_name.includes("@") ? p.full_name.trim().split(" ")[0] : "";
+    if (stored) return stored;
+    const local = (p.email || "").split("@")[0].split(/[._-]+/)[0];
+    return local ? local.charAt(0).toUpperCase() + local.slice(1) : "Unknown";
+  }
+  const nameByUser = new Map((profiles || []).map((p) => [p.id, firstNameFor(p)]));
 
-  // "App usage %" — of all registered users, how many had at least one
+  // "Active (7d)" tile — of all registered users, how many had at least one
   // recorded action in the last 7 days.
   const sevenDaysAgo = Date.now() - 7 * 86_400_000;
   const activeUserIds = new Set(
     (usageEvents || []).filter((e) => new Date(e.occurred_at).getTime() >= sevenDaysAgo).map((e) => e.user_id)
   );
-  const usagePercent = totalUsers ? Math.round((activeUserIds.size / totalUsers) * 100) : 0;
 
-  // Per-user activity count in the last 7 days, so usage can be shown
-  // against each individual user in the list below, not just as one
-  // aggregate tile at the top.
-  const eventCountByUser = new Map<string, number>();
+  // Per-user usage % — the same "distinct active days in the last 30, out
+  // of 30" formula as the personal Settings > Your activity tile, just
+  // computed once per user here so each row carries its own number instead
+  // of everyone sharing one combined tile at the top.
+  const daysByUser = new Map<string, Set<string>>();
   for (const e of usageEvents || []) {
-    if (new Date(e.occurred_at).getTime() >= sevenDaysAgo) {
-      eventCountByUser.set(e.user_id, (eventCountByUser.get(e.user_id) || 0) + 1);
-    }
+    const day = new Date(e.occurred_at).toDateString();
+    const set = daysByUser.get(e.user_id) ?? new Set<string>();
+    set.add(day);
+    daysByUser.set(e.user_id, set);
   }
+  const usagePercentByUser = new Map<string, number>(
+    Array.from(daysByUser.entries()).map(([uid, days]) => [uid, Math.min(100, Math.round((days.size / 30) * 100))])
+  );
 
   // Dedupe sign-ins to one row per user — logging in twice creates two
   // rows in sign_ins, which used to show as if there were two accounts.
@@ -66,15 +85,14 @@ export async function GET() {
     .sort((a, b) => new Date(b.signed_in_at).getTime() - new Date(a.signed_in_at).getTime())
     .map((s) => ({
       ...s,
-      user_label: emailByUser.get(s.user_id) || "Unknown",
+      user_label: nameByUser.get(s.user_id) || "Unknown",
       sign_in_count: signInCountByUser.get(s.user_id) || 1,
-      events_last_7d: eventCountByUser.get(s.user_id) || 0,
+      usage_percent: usagePercentByUser.get(s.user_id) || 0,
     }));
 
   return NextResponse.json({
     totalUsers: totalUsers ?? 0,
     activeUsersLast7Days: activeUserIds.size,
-    usagePercent,
     signIns: dedupedSignIns,
   });
 }
