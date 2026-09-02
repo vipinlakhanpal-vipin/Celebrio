@@ -167,7 +167,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
             </button>
             <button
               onClick={() => window.location.reload()}
-              className="btn-ghost relative !px-2.5 text-xs font-medium text-[var(--muted)]"
+              className="btn-ghost relative !px-2.5 text-xs font-bold text-amber-600 dark:text-amber-400"
               title={updateAvailable ? `New version available (v${latestVersion}) — click to refresh` : `Celebrio v${APP_VERSION}`}
             >
               v{APP_VERSION}
@@ -181,7 +181,11 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
               aria-label="Toggle theme"
               title="Toggle theme"
             >
-              {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+              {theme === "dark" ? (
+                <Sun size={17} className="text-amber-500 dark:text-amber-400" />
+              ) : (
+                <Moon size={17} className="text-amber-500 dark:text-amber-400" />
+              )}
             </button>
             <button onClick={signOut} className="btn-ghost" title="Sign out">
               <LogOut size={17} />
@@ -201,7 +205,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
         <div className="flex items-center gap-1">
           <button
             onClick={() => window.location.reload()}
-            className="btn-ghost relative !px-2 text-xs font-medium text-[var(--muted)]"
+            className="btn-ghost relative !px-2 text-xs font-bold text-amber-600 dark:text-amber-400"
             title={updateAvailable ? `New version available (v${latestVersion}) — tap to refresh` : `Celebrio v${APP_VERSION}`}
           >
             v{APP_VERSION}
@@ -214,14 +218,29 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
             className="btn-ghost"
             aria-label="Toggle theme"
           >
-            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === "dark" ? (
+              <Sun size={18} className="text-amber-500 dark:text-amber-400" />
+            ) : (
+              <Moon size={18} className="text-amber-500 dark:text-amber-400" />
+            )}
           </button>
         </div>
       </header>
 
       {/* ---------- Mobile bottom nav ---------- */}
+      {/* Solid background, no backdrop-blur: a translucent + blurred
+          position:fixed bar combined with the safe-area inset is a known
+          spot for Safari (especially installed-to-home-screen/standalone)
+          to leave a plain, unstyled gap below the bar while its dynamic
+          toolbar animates — the blur pass doesn't always repaint the inset
+          area in step with the rest of the bar. Solid color removes any
+          chance of seeing through to that gap; the safe-area padding stays
+          on the bar itself so the tap targets never sit under the home
+          indicator on any phone or tablet — env() reports the exact inset
+          for whatever device this renders on, so there's nothing to tune
+          per-model. */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg)]/95 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg)] md:hidden"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
           paddingLeft: "env(safe-area-inset-left)",
