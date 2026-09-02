@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Users, CalendarHeart, CheckCircle2, Sparkles as SparklesIcon, X, Home, Briefcase, Heart, UserCircle2 } from "lucide-react";
 import { Approval, Contact, OccasionPrompt, relationshipCategory } from "@/lib/types";
+import { CATEGORY_COLORS } from "@/lib/category-colors";
 import { daysUntilNextOccurrence, formatFriendlyDate, nextOccurrenceDate, ordinal, turningAge } from "@/lib/date-utils";
 import { gradientFor, initials } from "@/components/contacts/ContactCard";
 import { PageHeader } from "@/components/PageHeader";
@@ -73,15 +74,17 @@ export function DashboardClient({
     return counts;
   }, [contacts]);
 
-  // Each category gets its own gentle tint (same family used for the
-  // "Review" badge elsewhere) so Family/Friends/Colleagues/Relatives/Others
-  // read apart at a glance instead of five identical gray chips.
+  // Each category gets its own bold gradient fill (same treatment as the
+  // stat tiles above, and the same palette used on the Contacts page's
+  // filter tabs) so Family/Friends/Colleagues/Relatives/Others read apart
+  // at a glance — the previous pastel tint was too low-contrast to read
+  // comfortably in either theme.
   const CATEGORIES = [
-    { key: "family", label: "Family", icon: Home, className: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/15" },
-    { key: "friends", label: "Friends", icon: Users, className: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/15" },
-    { key: "colleagues", label: "Colleagues", icon: Briefcase, className: "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/15" },
-    { key: "relatives", label: "Relatives", icon: Heart, className: "text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-500/15" },
-    { key: "others", label: "Others", icon: UserCircle2, className: "text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-500/15" },
+    { key: "family", label: "Family", icon: Home },
+    { key: "friends", label: "Friends", icon: Users },
+    { key: "colleagues", label: "Colleagues", icon: Briefcase },
+    { key: "relatives", label: "Relatives", icon: Heart },
+    { key: "others", label: "Others", icon: UserCircle2 },
   ] as const;
 
   async function dismissPrompt(id: string) {
@@ -159,15 +162,16 @@ export function DashboardClient({
         <div className="mb-6">
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Categories</h2>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {CATEGORIES.map(({ key, label, icon: Icon, className }) => (
+            {CATEGORIES.map(({ key, label, icon: Icon }) => (
               <Link
                 key={key}
                 href={`/contacts?tab=${key}`}
-                className={`flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2.5 transition-transform hover:-translate-y-0.5 ${className}`}
+                className="flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2.5 text-white shadow-sm transition-transform hover:-translate-y-0.5"
+                style={{ background: CATEGORY_COLORS[key].gradient }}
               >
                 <Icon size={15} />
                 <span className="text-sm font-medium">{label}</span>
-                <span className="text-xs font-semibold opacity-70">{categoryCounts[key]}</span>
+                <span className="text-xs font-semibold opacity-80">{categoryCounts[key]}</span>
               </Link>
             ))}
           </div>
