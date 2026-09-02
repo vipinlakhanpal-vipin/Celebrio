@@ -258,7 +258,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium"
+                className="relative flex flex-1 flex-col items-center gap-1 pb-4 pt-3 text-[11px] font-medium"
               >
                 {isAria ? (
                   <span
@@ -298,7 +298,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
 
           <button
             onClick={() => window.location.reload()}
-            className="relative flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium"
+            className="relative flex flex-1 flex-col items-center gap-1 pb-4 pt-3 text-[11px] font-medium"
             aria-label={updateAvailable ? "Update available — tap to refresh" : "Refresh"}
           >
             <span className="relative">
