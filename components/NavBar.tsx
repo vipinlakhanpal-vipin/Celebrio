@@ -17,6 +17,7 @@ import {
 import { clsx } from "clsx";
 import { useTheme } from "@/components/ThemeProvider";
 import { APP_VERSION } from "@/lib/version";
+import { Wordmark } from "@/components/Wordmark";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
@@ -65,34 +66,6 @@ function AriaIcon({
         )}
       </span>
       <Bot size={size} strokeWidth={2.3} style={{ color: iconColor }} />
-    </span>
-  );
-}
-
-// The whole logo: no icon box, just the name itself set in a warm serif —
-// the way a fine stationer's wordmark works — with the dot on the "i"
-// swapped for a small gold-to-rose spark instead of the font's plain dot.
-function Wordmark({ size }: { size: number }) {
-  return (
-    <span className="font-wordmark font-semibold text-[var(--fg)]" style={{ fontSize: size }} aria-label="Celebrio">
-      <span aria-hidden="true">
-        Celebr
-        <span className="relative inline-block">
-          ı
-          <span
-            className="absolute rounded-full"
-            style={{
-              left: "50%",
-              top: "-0.3em",
-              width: "0.16em",
-              height: "0.16em",
-              transform: "translateX(-50%)",
-              background: "linear-gradient(135deg, #ffd27a, #d6336c)",
-            }}
-          />
-        </span>
-        o
-      </span>
     </span>
   );
 }
