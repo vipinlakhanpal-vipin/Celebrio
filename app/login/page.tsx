@@ -3,8 +3,9 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Cake, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Wordmark } from "@/components/Wordmark";
 
 export default function LoginPage() {
   return (
@@ -43,19 +44,24 @@ function LoginForm() {
     <div className="flex min-h-dvh items-center justify-center bg-[var(--bg)] px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-2 text-center">
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-2xl text-white"
-            style={{ background: "var(--accent)" }}
-          >
-            <Cake size={26} />
-          </div>
+          <Wordmark size={30} />
           <h1 className="font-display text-xl font-semibold text-[var(--fg)]">Welcome back</h1>
           <p className="text-sm text-[var(--muted)]">Sign in to your Celebrio account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          {/* type="text" + inputMode="email" instead of type="email" — on
+              some mobile browsers (notably iOS/Android when the app is
+              installed to the home screen and running standalone) an
+              input[type=email] can fail to bring up the keyboard at all,
+              while type=password and plain text inputs work fine. This
+              still gets the email keyboard layout via inputMode, reliably. */}
           <input
-            type="email"
+            type="text"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
             required
             placeholder="Email"
             value={email}
