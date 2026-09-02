@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { clsx } from "clsx";
 import { Plus, Upload, Search, Users, CalendarHeart, CheckCircle2 } from "lucide-react";
 import { Contact, relationshipCategory } from "@/lib/types";
@@ -153,11 +153,12 @@ export function ContactsClient({
           existed off to the right. Wrapping keeps every tab visible and
           tappable without a swipe someone has to discover first.
 
-          "All" stays the neutral accent-colored tab it always was; each
-          category tab picks up the same color used for it everywhere else
-          (Dashboard chips included) — solid fill when selected, a colored
-          outline when not, so all six stay easy to tell apart even before
-          you tap one. */}
+          Every tab is always the same solid color used for it everywhere
+          else (Dashboard chips included) — not just when it's the active
+          filter — so this row matches the Home page look exactly. The
+          active tab is picked out with full opacity + a ring in its own
+          color; the rest dim slightly so the current filter still reads
+          clearly at a glance. */}
       <div className="mb-4 flex flex-wrap gap-2">
         {CATEGORY_TABS.map((t) => {
           const colors = CATEGORY_COLORS[t.key];
@@ -167,14 +168,15 @@ export function ContactsClient({
               key={t.key}
               onClick={() => setActiveTab(t.key)}
               className={clsx(
-                "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
-                active
-                  ? "text-white"
-                  : colors
-                    ? `border bg-transparent ${colors.outlineClassName}`
-                    : "border border-[var(--border)] bg-[var(--card)] text-[var(--muted)] hover:text-[var(--fg)]"
+                "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition-all",
+                active ? "opacity-100 ring-2 ring-offset-2 ring-offset-[var(--bg)]" : "opacity-70 hover:opacity-90"
               )}
-              style={active ? { background: colors ? colors.gradient : "var(--accent)" } : undefined}
+              style={
+                {
+                  background: colors ? colors.gradient : "var(--accent)",
+                  "--tw-ring-color": colors ? colors.ring : "var(--accent)",
+                } as CSSProperties
+              }
             >
               {t.label}
             </button>
