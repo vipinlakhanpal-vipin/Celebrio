@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Cake, Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Wordmark } from "@/components/Wordmark";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -52,12 +53,7 @@ export default function SignupPage() {
     <div className="flex min-h-dvh items-center justify-center bg-[var(--bg)] px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-2 text-center">
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-2xl text-white"
-            style={{ background: "var(--accent)" }}
-          >
-            <Cake size={26} />
-          </div>
+          <Wordmark size={30} />
           <h1 className="font-display text-xl font-semibold text-[var(--fg)]">Create your account</h1>
           <p className="text-sm text-[var(--muted)]">Never miss a birthday again</p>
         </div>
@@ -71,8 +67,16 @@ export default function SignupPage() {
             onChange={(e) => setName(e.target.value)}
             className="input"
           />
+          {/* type="text" + inputMode="email" instead of type="email" — see
+              the note on the login page: input[type=email] can fail to open
+              the keyboard at all on some mobile browsers, particularly the
+              installed-to-home-screen standalone PWA. */}
           <input
-            type="email"
+            type="text"
+            inputMode="email"
+            autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
             required
             placeholder="Email"
             value={email}
