@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Moon, Sun, Laptop, Check, Mail, MessageCircle, Bell, ShieldCheck, Users, Smartphone, Monitor, MapPin, Loader2, Trash2 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { PageHeader } from "@/components/PageHeader";
@@ -309,6 +309,28 @@ function ActivitySection({
   contactCount: number;
   memberSince: string;
 }) {
+  // Group by calendar day so signing in three times in one day shows one
+  // row (the latest sign-in that day, with a ×3 badge) instead of three
+  // near-identical rows.
+  const daily = useMemo(() => {
+    const map = new Map<string, { latest: SignIn; count: number }>();
+    for (const s of signIns) {
+      const day = new Date(s.signed_in_at).toDateString();
+      const entry = map.get(day);
+      if (!entry) {
+        map.set(day, { latest: s, count: 1 });
+      } else {
+        entry.count += 1;
+        if (new Date(s.signed_in_at).getTime() > new Date(entry.latest.signed_in_at).getTime()) {
+          entry.latest = s;
+        }
+      }
+    }
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.latest.signed_in_at).getTime() - new Date(a.latest.signed_in_at).getTime()
+    );
+  }, [signIns]);
+
   return (
     <Section title="Your activity" subtitle="Recent sign-ins and app usage for your account">
       <div className="mb-3 grid grid-cols-3 gap-3">
@@ -329,22 +351,27 @@ function ActivitySection({
       </div>
 
       <div className="card divide-y divide-[var(--border)]">
-        {signIns.length === 0 ? (
+        {daily.length === 0 ? (
           <p className="p-4 text-sm text-[var(--muted)]">No sign-ins recorded yet.</p>
         ) : (
-          signIns.map((s) => (
-            <div key={s.id} className="flex items-center gap-3 p-3 text-sm">
-              {s.device_type === "mobile" ? (
+          daily.map(({ latest, count }) => (
+            <div key={latest.id} className="flex items-center gap-3 p-3 text-sm">
+              {latest.device_type === "mobile" ? (
                 <Smartphone size={15} className="text-[var(--muted)]" />
               ) : (
                 <Monitor size={15} className="text-[var(--muted)]" />
               )}
-              <span className="flex-1 text-[var(--fg)]">
-                {new Date(s.signed_in_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+              <span className="flex-1 items-center text-[var(--fg)]">
+                {dayLabel(latest.signed_in_at)}
+                {count > 1 && (
+                  <span className="ml-1.5 rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--accent)]">
+                    ×{count}
+                  </span>
+                )}
               </span>
               <span className="flex items-center gap-1 text-xs text-[var(--muted)]">
                 <MapPin size={12} />
-                {[s.city, s.country].filter(Boolean).join(", ") || "Unknown location"}
+                {[latest.city, latest.country].filter(Boolean).join(", ") || "Unknown location"}
               </span>
             </div>
           ))
@@ -352,6 +379,19 @@ function ActivitySection({
       </div>
     </Section>
   );
+}
+
+// "Today, 1:31 PM" / "Yesterday, 9:02 AM" / "Aug 29, 9:02 AM" — friendlier
+// than a raw date+time for a list that's already grouped by day.
+function dayLabel(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  if (d.toDateString() === now.toDateString()) return `Today, ${time}`;
+  if (d.toDateString() === yesterday.toDateString()) return `Yesterday, ${time}`;
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 type AdminSignIn = {
@@ -363,14 +403,13 @@ type AdminSignIn = {
   country: string | null;
   device_type: string | null;
   sign_in_count: number;
-  events_last_7d: number;
+  usage_percent: number;
 };
 
 function AdminSection() {
   const [stats, setStats] = useState<{
     totalUsers: number;
     activeUsersLast7Days: number;
-    usagePercent: number;
     signIns: AdminSignIn[];
   } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -416,7 +455,10 @@ function AdminSection() {
 
   return (
     <Section title="Admin — all users" subtitle="Visible only to your account (profiles.is_admin)">
-      <div className="mb-3 grid grid-cols-3 gap-3">
+      {/* Down to two tiles — the third slot (overall app usage) now lives
+          on each row below instead, since it means more against a person
+          than as one number combining everyone. */}
+      <div className="mb-3 grid grid-cols-2 gap-3">
         <div className="card p-3 text-center">
           <p className="font-display text-xl font-bold text-[var(--fg)]">{stats.totalUsers}</p>
           <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
@@ -428,16 +470,13 @@ function AdminSection() {
           <p className="font-display text-xl font-bold text-[var(--fg)]">{stats.activeUsersLast7Days}</p>
           <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">Active (7d)</p>
         </div>
-        <div className="card p-3 text-center" style={{ background: "var(--accent-soft)", borderColor: "transparent" }}>
-          <p className="font-display text-xl font-bold text-[var(--accent)]">{stats.usagePercent}%</p>
-          <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">App usage</p>
-        </div>
       </div>
 
       {/* One row per user (deduped from the raw login-event log — signing
-          in twice used to show as two rows), showing their latest sign-in
-          date+time and their own recent-activity count, plus a delete
-          button that removes the account and all of its data. */}
+          in twice used to show as two rows): first name (not the raw
+          email), last login date + time, location, that user's own
+          30-day usage %, and a delete button that removes the account and
+          all of its data. */}
       <div className="card max-h-96 divide-y divide-[var(--border)] overflow-y-auto">
         <div className="flex items-center gap-2 p-3 text-xs font-semibold text-[var(--muted)]">
           <ShieldCheck size={13} /> All users — latest sign-in
@@ -446,13 +485,19 @@ function AdminSection() {
           <div key={s.user_id} className="flex items-center gap-3 p-3 text-sm">
             {s.device_type === "mobile" ? <Smartphone size={14} className="shrink-0 text-[var(--muted)]" /> : <Monitor size={14} className="shrink-0 text-[var(--muted)]" />}
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[var(--fg)]">{s.user_label}</p>
+              <p className="flex flex-wrap items-center gap-1.5 text-[var(--fg)]">
+                <span className="truncate font-medium">{s.user_label}</span>
+                <span className="shrink-0 rounded-full bg-[var(--accent-soft)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--accent)]">
+                  {s.usage_percent}% usage
+                </span>
+              </p>
               <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-[var(--muted)]">
                 <span>
-                  Last signed in{" "}
+                  Last login:{" "}
                   {new Date(s.signed_in_at).toLocaleString("en-US", {
                     month: "short",
                     day: "numeric",
+                    year: "numeric",
                     hour: "numeric",
                     minute: "2-digit",
                   })}
@@ -462,11 +507,6 @@ function AdminSection() {
                   <MapPin size={11} />
                   {[s.city, s.country].filter(Boolean).join(", ") || "—"}
                 </span>
-                {s.events_last_7d > 0 ? (
-                  <span className="font-medium text-emerald-600 dark:text-emerald-400">Active this week</span>
-                ) : (
-                  <span>No activity this week</span>
-                )}
               </p>
             </div>
             <button
