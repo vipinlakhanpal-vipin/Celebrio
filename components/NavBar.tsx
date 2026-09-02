@@ -128,6 +128,14 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  // Every item in this row is visible the instant the page
+                  // loads, so Next's automatic prefetch fires a background
+                  // fetch for all five at once — that burst of simultaneous
+                  // queries was intermittently getting some of them refused
+                  // (503s), which then forced a slow full-page reload on
+                  // click instead of the fast in-place swap. A plain fetch
+                  // triggered on click, one at a time, is more predictable.
+                  prefetch={false}
                   className={clsx(
                     "relative flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
                     active
@@ -258,6 +266,11 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
               <Link
                 key={item.href}
                 href={item.href}
+                // Same reasoning as the desktop nav above: all five tabs are
+                // on screen at once, so letting them all prefetch together
+                // was the thing causing intermittent failures and the slow
+                // full-reload fallback — turning it off here too.
+                prefetch={false}
                 className="relative flex flex-1 flex-col items-center gap-1 pb-4 pt-3 text-[11px] font-medium"
               >
                 {isAria ? (
