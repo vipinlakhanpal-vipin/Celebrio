@@ -237,42 +237,50 @@ export function DashboardClient({
               const occasionLabel = age !== null ? `${ordinal(age)} ${occasionWord}` : occasionWord;
               const icon = item.kind === "birthday" ? "🎂" : "💕";
               return (
-              <div key={`${item.contact.id}-${item.kind}`} className="flex items-start gap-2.5 p-3">
-                <span
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                  style={{ background: `linear-gradient(135deg, ${gradientFor(item.contact.full_name).join(",")})` }}
-                >
-                  {initials(item.contact.full_name)}
-                </span>
-                <div className="min-w-0 flex-1">
-                  {/* Row 1: name (wraps instead of truncating so a long name is
-                      never cut off) + the day countdown, pinned to the right. */}
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="break-words text-sm font-medium leading-snug text-[var(--fg)]">
-                      {item.contact.full_name}
-                    </p>
-                    <span
-                      className="badge shrink-0 whitespace-nowrap"
-                      style={
-                        item.days === 0
-                          ? { background: "var(--accent)", color: "var(--accent-fg)" }
-                          : { background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--muted)" }
-                      }
-                    >
-                      {item.days === 0 ? (
-                        "Today 🎉"
-                      ) : (
-                        <>
-                          {item.days} Day{item.days === 1 ? "" : "s"}
-                          {/* "Remaining" only fits alongside everything else once the
-                              row has room to breathe (sm breakpoint+) — hidden on a
-                              mobile-width screen so nothing wraps or gets clipped. */}
-                          <span className="hidden sm:inline">&nbsp;Remaining</span>
-                        </>
-                      )}
-                    </span>
-                  </div>
-                  {/* Row 2: occasion + count merged into one line ("52nd Birthday"),
+              // Same split-tile pattern as the Contacts cards: who (avatar,
+              // name, relationship) on the left, the rest of the details on
+              // the right, divided by a thin rule — instead of stacking
+              // everything top-to-bottom in one column.
+              <div key={`${item.contact.id}-${item.kind}`} className="flex items-stretch gap-3 p-3">
+                <div className="flex w-[42%] shrink-0 flex-col items-start gap-2">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
+                    style={{ background: `linear-gradient(135deg, ${gradientFor(item.contact.full_name).join(",")})` }}
+                  >
+                    {initials(item.contact.full_name)}
+                  </span>
+                  <p className="break-words text-sm font-medium leading-snug text-[var(--fg)]">
+                    {item.contact.full_name}
+                  </p>
+                  {item.contact.relationship && (
+                    <p className="break-words text-xs text-[var(--muted)]">{item.contact.relationship}</p>
+                  )}
+                </div>
+
+                <div className="w-px shrink-0 self-stretch" style={{ background: "var(--border)" }} />
+
+                <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+                  <span
+                    className="badge w-fit shrink-0 whitespace-nowrap"
+                    style={
+                      item.days === 0
+                        ? { background: "var(--accent)", color: "var(--accent-fg)" }
+                        : { background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--muted)" }
+                    }
+                  >
+                    {item.days === 0 ? (
+                      "Today 🎉"
+                    ) : (
+                      <>
+                        {item.days} Day{item.days === 1 ? "" : "s"}
+                        {/* "Remaining" only fits alongside everything else once the
+                            row has room to breathe (sm breakpoint+) — hidden on a
+                            mobile-width screen so nothing wraps or gets clipped. */}
+                        <span className="hidden sm:inline">&nbsp;Remaining</span>
+                      </>
+                    )}
+                  </span>
+                  {/* Occasion + count merged into one line ("52nd Birthday"),
                       with a small icon so birthdays and anniversaries read apart
                       at a glance without parsing the text. Fixed amber/pink instead
                       of --accent: --accent is user-customizable (Settings >
@@ -280,7 +288,7 @@ export function DashboardClient({
                       on the dark card background — these have explicit dark:
                       overrides so they stay readable no matter the theme. */}
                   <p
-                    className={`mt-1 flex items-center gap-1.5 text-xs font-semibold ${
+                    className={`flex items-center gap-1.5 text-xs font-semibold ${
                       item.kind === "birthday"
                         ? "text-amber-600 dark:text-amber-400"
                         : "text-pink-600 dark:text-pink-400"
@@ -289,11 +297,6 @@ export function DashboardClient({
                     {occasionLabel}
                     <span aria-hidden="true">{icon}</span>
                   </p>
-                  {/* Row 3: relationship, small and muted — plain text (not a
-                      badge) so it never competes for space with the name. */}
-                  {item.contact.relationship && (
-                    <p className="mt-0.5 break-words text-xs text-[var(--muted)]">{item.contact.relationship}</p>
-                  )}
                 </div>
               </div>
               );
