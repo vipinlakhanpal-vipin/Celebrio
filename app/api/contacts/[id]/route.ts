@@ -12,7 +12,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
-  const allowed = ["full_name", "relationship", "date_of_birth", "anniversary_date", "email", "phone", "notes"] as const;
+  const allowed = ["full_name", "relationship", "date_of_birth", "anniversary_date", "email", "phone", "address", "notes"] as const;
   const update: Record<string, unknown> = {};
   for (const key of allowed) {
     if (key in body) update[key] = body[key] === "" ? null : body[key];
