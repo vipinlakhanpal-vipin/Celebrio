@@ -261,7 +261,13 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
       <nav
         className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg)] md:hidden"
         style={{
-          paddingBottom: "env(safe-area-inset-bottom)",
+          // max(..., 8px) instead of the bare env() value: on a phone/browser
+          // combo where env(safe-area-inset-bottom) resolves to 0 (no home
+          // indicator, or a browser context that doesn't report it), the bar
+          // would otherwise sit with zero breathing room under the icons —
+          // this guarantees the bar always has a little padding pushing its
+          // bottom edge down, instead of looking clipped flush to the edge.
+          paddingBottom: "max(env(safe-area-inset-bottom), 8px)",
           paddingLeft: "env(safe-area-inset-left)",
           paddingRight: "env(safe-area-inset-right)",
           transform: "translateZ(0)",
