@@ -62,7 +62,7 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
   return (
     <button
       onClick={onClick}
-      className="card animate-float-in relative flex items-stretch gap-3.5 p-3.5 text-left transition-transform hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
+      className="card animate-float-in relative flex items-stretch gap-3 p-3 text-left transition-transform hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]"
     >
       {/* Pinned to the corner instead of sitting inline with the name now
           that the tile is split into two columns — there's no single row
@@ -83,15 +83,22 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
         </div>
       )}
 
-      {/* Left half: who — avatar, name, relationship. */}
-      <div className="flex w-[42%] shrink-0 flex-col items-start gap-2">
-        <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm"
-          style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
-        >
-          {initials(contact.full_name) || "?"}
+      {/* Left half: who — avatar sits right before the name on the same
+          row instead of stacked above it, sized to the name's own line
+          height rather than a big standalone circle. That's a full row of
+          vertical space cut out of every tile — on the single-column mobile
+          grid that difference is what lets noticeably more contacts fit on
+          screen at once instead of one or two before you have to scroll. */}
+      <div className="flex w-[42%] shrink-0 flex-col items-start gap-1.5">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white shadow-sm"
+            style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}
+          >
+            {initials(contact.full_name) || "?"}
+          </span>
+          <p className="min-w-0 break-words font-medium leading-snug text-[var(--fg)]">{contact.full_name}</p>
         </div>
-        <p className="break-words font-medium leading-snug text-[var(--fg)]">{contact.full_name}</p>
         {contact.relationship && (
           // Neutral border/bg instead of the accent pairing: --accent is
           // user-customizable (Settings > Appearance) but --accent-soft is
