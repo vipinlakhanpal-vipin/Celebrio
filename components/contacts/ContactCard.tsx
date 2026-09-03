@@ -113,9 +113,14 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
       {/* Right half: the rest — birthday, anniversary, email, phone. */}
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 text-xs text-[var(--muted)]">
         {contact.date_of_birth ? (
-          <span className="flex items-center gap-1.5 truncate">
-            <Cake size={12} className="shrink-0" />
-            <span className="truncate">
+          // No truncate here (or on anniversary, below) — "Sep 17 · Turning
+          // 55" was getting clipped to "Sep 17 · Turning 5…" in the narrower
+          // right column on phone widths. Same items-start + break-words
+          // treatment as the address line: wraps to a second line instead
+          // of cutting text off, and the tile just grows to fit.
+          <span className="flex items-start gap-1.5">
+            <Cake size={12} className="mt-0.5 shrink-0" />
+            <span className="break-words">
               {formatFriendlyDate(contact.date_of_birth)}
               {birthdayAge !== null && ` · Turning ${birthdayAge}`}
             </span>
@@ -126,9 +131,9 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
           </span>
         )}
         {contact.anniversary_date && (
-          <span className="flex items-center gap-1.5 truncate">
-            <Heart size={12} className="shrink-0" />
-            <span className="truncate">
+          <span className="flex items-start gap-1.5">
+            <Heart size={12} className="mt-0.5 shrink-0" />
+            <span className="break-words">
               {formatFriendlyDate(contact.anniversary_date)}
               {anniversaryYears !== null && ` · ${ordinal(anniversaryYears)} Anniv.`}
             </span>
