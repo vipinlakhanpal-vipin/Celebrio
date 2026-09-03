@@ -116,7 +116,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
       <header className="sticky top-0 z-40 hidden border-b border-[var(--border)] bg-[var(--bg)]/85 backdrop-blur md:block">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Link href="/dashboard" className="flex items-center font-semibold text-[var(--fg)]">
-            <Wordmark size={22} />
+            <Wordmark size={22} minSize={16} />
           </Link>
 
           <nav className="flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--card)] p-1 shadow-sm">
