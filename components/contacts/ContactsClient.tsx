@@ -121,37 +121,37 @@ export function ContactsClient({
       {/* Same three stat tiles as the Dashboard, same colors, same numbers —
           so glancing at either page tells the same story. Smaller footprint
           on phones (tighter padding, smaller number/label) than desktop. */}
-      <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-3">
+      <div className="mb-5 grid grid-cols-3 gap-1.5 sm:gap-3">
         <div
-          className="rounded-2xl p-2.5 text-center shadow-md sm:p-4"
+          className="rounded-2xl p-2 text-center shadow-md sm:p-4"
           style={{ background: "linear-gradient(150deg, #3d7cf7 0%, #2657c9 100%)" }}
         >
-          <CalendarHeart size={14} className="mx-auto mb-1 text-white/85 sm:hidden" />
+          <CalendarHeart size={12} className="mx-auto mb-0.5 text-white/85 sm:hidden" />
           <CalendarHeart size={16} className="mx-auto mb-1 hidden text-white/85 sm:block" />
-          <p className="font-display text-lg font-bold text-white sm:text-2xl">{upcomingWithin30}</p>
-          <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
+          <p className="font-display text-base font-bold text-white sm:text-2xl">{upcomingWithin30}</p>
+          <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
             Upcoming
           </p>
         </div>
         <div
-          className="rounded-2xl p-2.5 text-center shadow-md sm:p-4"
+          className="rounded-2xl p-2 text-center shadow-md sm:p-4"
           style={{ background: "linear-gradient(150deg, #8b5cf6 0%, #6431e0 100%)" }}
         >
-          <CheckCircle2 size={14} className="mx-auto mb-1 text-white/85 sm:hidden" />
+          <CheckCircle2 size={12} className="mx-auto mb-0.5 text-white/85 sm:hidden" />
           <CheckCircle2 size={16} className="mx-auto mb-1 hidden text-white/85 sm:block" />
-          <p className="font-display text-lg font-bold text-white sm:text-2xl">{pendingApprovalCount}</p>
-          <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
+          <p className="font-display text-base font-bold text-white sm:text-2xl">{pendingApprovalCount}</p>
+          <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
             To approve
           </p>
         </div>
         <div
-          className="rounded-2xl p-2.5 text-center shadow-md sm:p-4"
+          className="rounded-2xl p-2 text-center shadow-md sm:p-4"
           style={{ background: "linear-gradient(150deg, #12b981 0%, #0a8f63 100%)" }}
         >
-          <Users size={14} className="mx-auto mb-1 text-white/85 sm:hidden" />
+          <Users size={12} className="mx-auto mb-0.5 text-white/85 sm:hidden" />
           <Users size={16} className="mx-auto mb-1 hidden text-white/85 sm:block" />
-          <p className="font-display text-lg font-bold text-white sm:text-2xl">{contacts.length}</p>
-          <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
+          <p className="font-display text-base font-bold text-white sm:text-2xl">{contacts.length}</p>
+          <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-wide text-white/75 sm:mt-1 sm:text-[11px]">
             Contacts
           </p>
         </div>
