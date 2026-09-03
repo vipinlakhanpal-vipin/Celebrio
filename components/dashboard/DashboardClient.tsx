@@ -249,23 +249,31 @@ export function DashboardClient({
               const occasionLabel = age !== null ? `${ordinal(age)} ${occasionWord}` : occasionWord;
               const icon = item.kind === "birthday" ? "🎂" : "💕";
               return (
-              // Same split-tile pattern as the Contacts cards: who (avatar,
-              // name, relationship) on the left, the rest of the details on
-              // the right, divided by a thin rule — instead of stacking
-              // everything top-to-bottom in one column.
+              // Same split-tile pattern as the Contacts cards — avatar sits
+              // inline right before the name instead of stacked above it,
+              // and the relationship is the same neutral badge — so an
+              // upcoming entry here looks like the same contact you'd find
+              // on the Contacts tab, not a differently-styled one-off.
               <div key={`${item.contact.id}-${item.kind}`} className="flex items-stretch gap-3 p-3">
-                <div className="flex w-[42%] shrink-0 flex-col items-start gap-2">
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-                    style={{ background: `linear-gradient(135deg, ${gradientFor(item.contact.full_name).join(",")})` }}
-                  >
-                    {initials(item.contact.full_name)}
-                  </span>
-                  <p className="break-words text-sm font-medium leading-snug text-[var(--fg)]">
-                    {item.contact.full_name}
-                  </p>
+                <div className="flex w-[42%] shrink-0 flex-col items-start gap-1.5">
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white shadow-sm"
+                      style={{ background: `linear-gradient(135deg, ${gradientFor(item.contact.full_name).join(",")})` }}
+                    >
+                      {initials(item.contact.full_name)}
+                    </span>
+                    <p className="min-w-0 break-words text-sm font-medium leading-snug text-[var(--fg)]">
+                      {item.contact.full_name}
+                    </p>
+                  </div>
                   {item.contact.relationship && (
-                    <p className="break-words text-xs text-[var(--muted)]">{item.contact.relationship}</p>
+                    <span
+                      className="badge"
+                      style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--fg)" }}
+                    >
+                      {item.contact.relationship}
+                    </span>
                   )}
                 </div>
 
