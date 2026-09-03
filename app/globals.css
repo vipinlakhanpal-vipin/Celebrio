@@ -103,7 +103,25 @@
 html,
 body {
   height: 100%;
+  /* 100% alone resolves against the layout viewport at load time, which on
+     iOS can be shorter than the true screen once you account for how the
+     dynamic toolbar and (in an installed/standalone app) the home-indicator
+     area get measured. dvh tracks the real, current visual viewport, so the
+     page always fills all the way to the physical bottom edge instead of
+     stopping a few pixels short of it — which is what was reading as a
+     sliver of bare, wrong-colored space peeking out below the fixed bottom
+     nav on some phones. Kept after the 100% so it only overrides in
+     browsers that understand the unit; everywhere else the 100% fallback
+     still applies. */
+  min-height: 100dvh;
   overflow-x: hidden;
+  /* Same background as the page itself. Belt-and-suspenders alongside the
+     dvh fix above: even if some other rendering quirk leaves a gap between
+     the fixed nav's bottom edge and the true screen edge on a given device,
+     what shows through there is now this color instead of the browser's
+     default canvas — so a mismatched-color gap can no longer be visible,
+     whatever the root cause. */
+  background: var(--bg);
   /* Kill the iOS/Android rubber-band bounce at the edges of the page — this
      is what reads as the screen "jumping" when a scroll gesture overshoots
      the top/bottom, especially once the app is installed to the home screen
