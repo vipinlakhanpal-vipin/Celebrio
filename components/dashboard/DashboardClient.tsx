@@ -263,12 +263,12 @@ export function DashboardClient({
                     >
                       {initials(item.contact.full_name)}
                     </span>
-                    {/* Same fixed 12px as the Contacts tab's ContactCard —
+                    {/* Same fixed 11px as the Contacts tab's ContactCard —
                         the app's 18px root font-size makes rem-based text
-                        sizes land bigger than they look elsewhere, and 12px
-                        is the largest size that reliably keeps a two-word
-                        name on one line in this ~88px-wide column. */}
-                    <p className="min-w-0 break-words text-[12px] font-medium leading-snug text-[var(--fg)]">
+                        sizes land bigger than they look elsewhere, and 11px
+                        is what reliably keeps a two-word name on one line
+                        in this ~88px-wide column. */}
+                    <p className="min-w-0 break-words text-[11px] font-medium leading-snug text-[var(--fg)]">
                       {item.contact.full_name}
                     </p>
                   </div>
