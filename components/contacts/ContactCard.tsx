@@ -97,7 +97,7 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
           >
             {initials(contact.full_name) || "?"}
           </span>
-          <p className="min-w-0 break-words font-medium leading-snug text-[var(--fg)]">{contact.full_name}</p>
+          <p className="min-w-0 break-words text-sm font-medium leading-snug text-[var(--fg)]">{contact.full_name}</p>
         </div>
         {contact.relationship && (
           // Neutral border/bg instead of the accent pairing: --accent is
