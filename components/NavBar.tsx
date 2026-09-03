@@ -248,13 +248,23 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
           on the bar itself so the tap targets never sit under the home
           indicator on any phone or tablet — env() reports the exact inset
           for whatever device this renders on, so there's nothing to tune
-          per-model. */}
+          per-model.
+
+          translateZ(0) promotes the bar to its own compositor layer. Without
+          it, a plain `position: fixed` element can lag a frame or two behind
+          the visual viewport while Safari's address bar animates in/out on
+          scroll — which reads as exactly what it looks like: the bar sitting
+          a bit "up" from the true bottom edge with a sliver of bare page
+          background showing beneath it until the browser catches up. Forcing
+          the compositor layer keeps the bar locked to the visual viewport
+          for every frame of that animation instead of trailing it. */}
       <nav
         className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg)] md:hidden"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
           paddingLeft: "env(safe-area-inset-left)",
           paddingRight: "env(safe-area-inset-right)",
+          transform: "translateZ(0)",
         }}
       >
         <div className="mx-auto flex max-w-md items-stretch justify-between px-2">
