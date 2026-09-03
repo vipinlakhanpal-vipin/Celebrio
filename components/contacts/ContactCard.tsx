@@ -97,7 +97,13 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
           >
             {initials(contact.full_name) || "?"}
           </span>
-          <p className="min-w-0 break-words text-sm font-medium leading-snug text-[var(--fg)]">{contact.full_name}</p>
+          {/* Fixed px instead of a text-sm/text-xs step: the app's root
+              font-size is 18px, so Tailwind's rem-based text sizes land
+              larger than they look elsewhere — 12px measured against real
+              two-word names (e.g. "Sushil Prashar") is the largest size
+              that reliably clears this column's ~88px width without
+              wrapping to a second line. */}
+          <p className="min-w-0 break-words text-[12px] font-medium leading-snug text-[var(--fg)]">{contact.full_name}</p>
         </div>
         {contact.relationship && (
           // Neutral border/bg instead of the accent pairing: --accent is
