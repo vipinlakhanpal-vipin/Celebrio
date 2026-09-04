@@ -111,9 +111,18 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
           // a fixed indigo tint, so accent-colored text on it can go
           // low-contrast for lighter accent picks. This combo stays
           // readable in both themes no matter which accent is chosen.
+          // fontSize/fontWeight override .badge's own 0.72rem/600 so the
+          // relationship line matches the name right above it exactly,
+          // instead of reading slightly larger and bolder.
           <span
             className="badge"
-            style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--fg)" }}
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border)",
+              color: "var(--fg)",
+              fontSize: "11px",
+              fontWeight: 500,
+            }}
           >
             {contact.relationship}
           </span>
