@@ -129,13 +129,17 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
                   key={item.href}
                   href={item.href}
                   // Every item in this row is visible the instant the page
-                  // loads, so Next's automatic prefetch fires a background
-                  // fetch for all five at once — that burst of simultaneous
-                  // queries was intermittently getting some of them refused
-                  // (503s), which then forced a slow full-page reload on
-                  // click instead of the fast in-place swap. A plain fetch
-                  // triggered on click, one at a time, is more predictable.
-                  prefetch={false}
+                  // loads. Prefetch used to be off entirely here: all five
+                  // routes shared one loading.tsx (at the (app) group level),
+                  // so Next's auto-prefetch found no per-route boundary to
+                  // stop at and reached all the way into each page's live
+                  // Supabase queries — five at once, which occasionally got
+                  // rate-limited (503s) and forced a slow full-page reload.
+                  // Now that each route below has its own loading.tsx, the
+                  // default "auto" prefetch (leaving this prop unset) stops
+                  // at that per-route boundary — it only warms the route
+                  // shell, not the data — so tabs switch instantly without
+                  // re-triggering that burst.
                   className={clsx(
                     "relative flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
                     active
@@ -282,11 +286,9 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
               <Link
                 key={item.href}
                 href={item.href}
-                // Same reasoning as the desktop nav above: all five tabs are
-                // on screen at once, so letting them all prefetch together
-                // was the thing causing intermittent failures and the slow
-                // full-reload fallback — turning it off here too.
-                prefetch={false}
+                // Same reasoning as the desktop nav above — now safe to
+                // leave on default "auto" prefetch since each route has its
+                // own loading.tsx boundary for it to stop at.
                 className="relative flex flex-1 flex-col items-center gap-1 pb-4 pt-3 text-[11px] font-medium"
               >
                 {isAria ? (
