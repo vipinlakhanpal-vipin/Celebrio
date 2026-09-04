@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
   const cleaned: ImportRow[] = contactsIn
     .map((c: unknown) => (c && typeof c === "object" ? (c as Record<string, unknown>) : {}))
-    .map((c) => ({
+    .map((c: Record<string, unknown>) => ({
       full_name: cleanStr(c.full_name) || "",
       date_of_birth: cleanStr(c.date_of_birth),
       anniversary_date: cleanStr(c.anniversary_date),
