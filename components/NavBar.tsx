@@ -168,9 +168,17 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
           <div className="flex items-center gap-2">
             {/* Explicit refresh action — the version badge next to it is
                 clickable too, but a dedicated icon makes "tap to reload"
-                discoverable without having to notice the badge is a button. */}
+                discoverable without having to notice the badge is a button.
+                Only a real version update needs window.location.reload()
+                (a new JS bundle has to be fetched, so the browser has to do
+                a full navigation — a brief white flash there is normal and
+                unavoidable). The common case — just wanting fresher data,
+                no new build — used to trigger that same full hard reload
+                for no reason, flashing white every time. router.refresh()
+                re-runs the server components in place with no navigation
+                and no flash. */}
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => (updateAvailable ? window.location.reload() : router.refresh())}
               className="btn-ghost"
               aria-label="Refresh"
               title="Refresh"
@@ -178,7 +186,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
               <RefreshCw size={16} color={updateAvailable ? "var(--accent)" : "var(--muted)"} />
             </button>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => (updateAvailable ? window.location.reload() : router.refresh())}
               className="btn-ghost relative !px-2.5 text-xs font-extrabold text-amber-600 dark:text-amber-400"
               style={{ color: theme === "dark" ? "#fbbf24" : "#b45309" }}
               title={updateAvailable ? `New version available (v${latestVersion}) — click to refresh` : `Celebrio v${APP_VERSION}`}
@@ -217,7 +225,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
         </Link>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => (updateAvailable ? window.location.reload() : router.refresh())}
             className="btn-ghost relative !px-2 text-xs font-extrabold text-amber-600 dark:text-amber-400"
             style={{ color: theme === "dark" ? "#fbbf24" : "#b45309" }}
             title={updateAvailable ? `New version available (v${latestVersion}) — tap to refresh` : `Celebrio v${APP_VERSION}`}
@@ -328,7 +336,7 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
           })}
 
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => (updateAvailable ? window.location.reload() : router.refresh())}
             className="relative flex flex-1 flex-col items-center gap-1 pb-4 pt-3 text-[11px] font-medium"
             aria-label={updateAvailable ? "Update available — tap to refresh" : "Refresh"}
           >
