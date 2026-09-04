@@ -255,7 +255,11 @@ export function DashboardClient({
               // upcoming entry here looks like the same contact you'd find
               // on the Contacts tab, not a differently-styled one-off.
               <div key={`${item.contact.id}-${item.kind}`} className="flex items-stretch gap-3 p-3">
-                <div className="flex w-[42%] shrink-0 flex-col items-start gap-1.5">
+                {/* gap-1 (not 1.5) — same reasoning as the Contacts tab's
+                    ContactCard: the avatar's own height already pads this
+                    row out, so the full 1.5 gap read as too much space
+                    between the name and the relationship badge below it. */}
+                <div className="flex w-[42%] shrink-0 flex-col items-start gap-1">
                   <div className="flex min-w-0 items-center gap-1.5">
                     <span
                       className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white shadow-sm"
