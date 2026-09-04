@@ -273,9 +273,18 @@ export function DashboardClient({
                     </p>
                   </div>
                   {item.contact.relationship && (
+                    // fontSize/fontWeight override .badge's own 0.72rem/600
+                    // so this matches the 11px/500 name right above it,
+                    // same as the Contacts tab's ContactCard.
                     <span
                       className="badge"
-                      style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--fg)" }}
+                      style={{
+                        background: "var(--bg-elevated)",
+                        border: "1px solid var(--border)",
+                        color: "var(--fg)",
+                        fontSize: "11px",
+                        fontWeight: 500,
+                      }}
                     >
                       {item.contact.relationship}
                     </span>
@@ -284,7 +293,11 @@ export function DashboardClient({
 
                 <div className="w-px shrink-0 self-stretch" style={{ background: "var(--border)" }} />
 
-                <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
+                {/* items-center + text-center: the days-remaining badge and
+                    occasion line are centered within this half instead of
+                    hugging the left edge (next to the divider), so the two
+                    halves read as a balanced pair rather than lopsided. */}
+                <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 text-center">
                   <span
                     className="badge w-fit shrink-0 whitespace-nowrap"
                     style={
