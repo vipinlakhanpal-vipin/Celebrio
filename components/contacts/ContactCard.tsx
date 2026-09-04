@@ -89,7 +89,12 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
           vertical space cut out of every tile — on the single-column mobile
           grid that difference is what lets noticeably more contacts fit on
           screen at once instead of one or two before you have to scroll. */}
-      <div className="flex w-[42%] shrink-0 flex-col items-start gap-1.5">
+      {/* gap-1 (not the 1.5 the rest of this tile uses) — the avatar circle
+          above is taller than the name text itself, so the row it sits in
+          is already carrying a bit of built-in breathing room; a full
+          gap-1.5 on top of that read as a bigger gap than intended between
+          the name and the relationship badge below it. */}
+      <div className="flex w-[42%] shrink-0 flex-col items-start gap-1">
         <div className="flex min-w-0 items-center gap-1.5">
           <span
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white shadow-sm"
@@ -180,10 +185,16 @@ export function ContactCard({ contact, onClick }: { contact: Contact; onClick: (
                 e.stopPropagation();
                 window.open(whatsappLink(contact.phone!), "_blank", "noopener,noreferrer");
               }}
-              className="ml-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-white"
+              // Was h-4 w-4 (16px) with a 10px glyph — too small a target to
+              // reliably tap next to the phone-number text. Bumped to a
+              // 24px circle with a 14px glyph, and a negative margin/padding
+              // combo that grows the actual tap area a bit further past the
+              // visible circle without shifting the layout, so a slightly
+              // off tap still registers.
+              className="relative ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white before:absolute before:-inset-1.5 before:content-['']"
               style={{ background: "#25D366" }}
             >
-              <WhatsAppIcon size={10} />
+              <WhatsAppIcon size={14} />
             </span>
           </span>
         )}
