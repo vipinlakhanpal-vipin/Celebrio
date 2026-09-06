@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Send, Loader2 } from "lucide-react";
+import { Sparkles, Send, Loader2, RotateCcw } from "lucide-react";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -29,10 +29,16 @@ export function AriaChatClient({ initialMessages }: { initialMessages: Message[]
     setInput("");
     setSending(true);
     try {
+      // The request body was missing entirely — this fetch sent a POST
+      // with headers but no message, so every send (suggestion chip or
+      // typed question) hit the server with nothing to parse, which threw
+      // before it ever reached Anthropic and always landed in the catch
+      // block below with the generic "something went wrong" text. Aria
+      // could not have answered a single question until this was added.
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-
+        body: JSON.stringify({ message: trimmed }),
       });
       const json = await res.json();
       setMessages((prev) => [...prev, { role: "assistant", content: json.reply || "Sorry, something went wrong." }]);
@@ -41,6 +47,14 @@ export function AriaChatClient({ initialMessages }: { initialMessages: Message[]
     } finally {
       setSending(false);
     }
+  }
+
+  // Clears the local transcript back to the empty state so the suggestion
+  // chips reappear — the fastest way back to "the main screen of Aria"
+  // after an error or an answer, without needing a full page reload.
+  function resetChat() {
+    setMessages([]);
+    setInput("");
   }
 
   return (
@@ -57,10 +71,25 @@ export function AriaChatClient({ initialMessages }: { initialMessages: Message[]
         >
           <Sparkles size={20} />
         </span>
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="font-display text-lg font-semibold text-[var(--fg)]">Aria</p>
           <p className="text-sm text-[var(--muted)]">Your birthday &amp; greetings assistant</p>
         </div>
+        {/* Only shown once there's a transcript to back out of — an error
+            or an answer both leave the suggestion chips buried below a
+            scrolling conversation, with no way back to that starting
+            screen short of a full page reload. */}
+        {messages.length > 0 && (
+          <button
+            onClick={resetChat}
+            className="btn-secondary !text-sm flex shrink-0 items-center gap-1.5"
+            aria-label="Back to start"
+            title="Back to start"
+          >
+            <RotateCcw size={14} />
+            New chat
+          </button>
+        )}
       </div>
 
       <div className="max-h-[55vh] min-h-[16rem] overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4">
