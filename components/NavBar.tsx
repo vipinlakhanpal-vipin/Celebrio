@@ -177,6 +177,20 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
                 for no reason, flashing white every time. router.refresh()
                 re-runs the server components in place with no navigation
                 and no flash. */}
+            {/* A quiet red dot on the version badge was easy to miss —
+                this flashes a bright-blue pill right next to the refresh
+                icon so a shipped update is impossible to scroll past. */}
+            {updateAvailable && (
+              <button
+                onClick={() => window.location.reload()}
+                className="relative flex animate-pulse items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white shadow-sm"
+                style={{ background: "#2563eb" }}
+                title={`New version available (v${latestVersion}) — click to refresh`}
+              >
+                New Update Available
+                <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-[var(--bg)]" />
+              </button>
+            )}
             <button
               onClick={() => (updateAvailable ? window.location.reload() : router.refresh())}
               className="btn-ghost"
@@ -337,21 +351,26 @@ export function NavBar({ pendingCount = 0 }: { pendingCount?: number }) {
 
           <button
             onClick={() => (updateAvailable ? window.location.reload() : router.refresh())}
-            className="relative flex flex-1 flex-col items-center gap-1 pb-4 pt-3 text-[11px] font-medium"
-            aria-label={updateAvailable ? "Update available — tap to refresh" : "Refresh"}
+            className={clsx(
+              "relative flex flex-1 flex-col items-center gap-1 pb-4 pt-3 text-[11px] font-medium",
+              updateAvailable && "animate-pulse"
+            )}
+            aria-label={updateAvailable ? "New update available — tap to refresh" : "Refresh"}
           >
             <span className="relative">
               <RefreshCw
                 size={20}
-                color={updateAvailable ? "var(--accent)" : "var(--muted)"}
+                color={updateAvailable ? "#2563eb" : "var(--muted)"}
                 strokeWidth={updateAvailable ? 2.4 : 2}
               />
+              {/* Same bright-blue + red-dot treatment as the desktop pill,
+                  so a shipped update is just as hard to miss on mobile. */}
               {updateAvailable && (
                 <span className="absolute -right-1.5 -top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-[var(--bg)]" />
               )}
             </span>
-            <span style={{ color: updateAvailable ? "var(--accent)" : "var(--muted)" }}>
-              {updateAvailable ? "Update" : "Refresh"}
+            <span className="font-bold" style={{ color: updateAvailable ? "#2563eb" : "var(--muted)" }}>
+              {updateAvailable ? "New Update" : "Refresh"}
             </span>
           </button>
         </div>
