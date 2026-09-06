@@ -239,7 +239,7 @@ export function DashboardClient({
             </p>
           </div>
         ) : (
-          <div className="card divide-y divide-[var(--border)]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {upcoming.map((item) => {
               const icon = item.kind === "birthday" ? "🎂" : "💕";
               // null for the "unknown year" placeholder some dates use — in
@@ -257,7 +257,7 @@ export function DashboardClient({
               // and the relationship is the same neutral badge — so an
               // upcoming entry here looks like the same contact you'd find
               // on the Contacts tab, not a differently-styled one-off.
-              <div key={`${item.contact.id}-${item.kind}`} className="relative flex items-stretch gap-3 p-3">
+              <div key={`${item.contact.id}-${item.kind}`} className="card relative flex items-stretch gap-3 p-3">
                 {/* The days-remaining count used to be the headline of the
                     row (a big centered badge) — now that the right half
                     carries the same full detail as the Contacts tab, it
