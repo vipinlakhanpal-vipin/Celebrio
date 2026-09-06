@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Users, CalendarHeart, CheckCircle2, Sparkles as SparklesIcon, X, Home, Briefcase, Heart, UserCircle2 } from "lucide-react";
+import { Users, CalendarHeart, CheckCircle2, Sparkles as SparklesIcon, X, Home, Briefcase, Heart, UserCircle2, Cake, Mail, Phone, MapPin } from "lucide-react";
 import { Approval, Contact, OccasionPrompt, relationshipCategory } from "@/lib/types";
 import { CATEGORY_COLORS } from "@/lib/category-colors";
 import { daysUntilNextOccurrence, formatFriendlyDate, nextOccurrenceDate, ordinal, turningAge } from "@/lib/date-utils";
-import { gradientFor, initials } from "@/components/contacts/ContactCard";
+import { gradientFor, initials, whatsappLink, WhatsAppIcon } from "@/components/contacts/ContactCard";
 import { PageHeader } from "@/components/PageHeader";
 import { OccasionPickerModal } from "@/components/dashboard/OccasionPickerModal";
 
@@ -241,25 +241,48 @@ export function DashboardClient({
         ) : (
           <div className="card divide-y divide-[var(--border)]">
             {upcoming.map((item) => {
+              const icon = item.kind === "birthday" ? "🎂" : "💕";
               // null for the "unknown year" placeholder some dates use — in
               // that case we genuinely don't know the age/anniversary count,
-              // so we fall back to the plain occasion word with no ordinal.
-              const age = turningAge(item.date, nextOccurrenceDate(item.date));
-              const occasionWord = item.kind === "birthday" ? "Birthday" : "Anniversary";
-              const occasionLabel = age !== null ? `${ordinal(age)} ${occasionWord}` : occasionWord;
-              const icon = item.kind === "birthday" ? "🎂" : "💕";
+              // so the detail line below falls back to just the plain date.
+              const birthdayAge = item.contact.date_of_birth
+                ? turningAge(item.contact.date_of_birth, nextOccurrenceDate(item.contact.date_of_birth))
+                : null;
+              const anniversaryYears = item.contact.anniversary_date
+                ? turningAge(item.contact.anniversary_date, nextOccurrenceDate(item.contact.anniversary_date))
+                : null;
               return (
               // Same split-tile pattern as the Contacts cards — avatar sits
               // inline right before the name instead of stacked above it,
               // and the relationship is the same neutral badge — so an
               // upcoming entry here looks like the same contact you'd find
               // on the Contacts tab, not a differently-styled one-off.
-              <div key={`${item.contact.id}-${item.kind}`} className="flex items-stretch gap-3 p-3">
+              <div key={`${item.contact.id}-${item.kind}`} className="relative flex items-stretch gap-3 p-3">
+                {/* The days-remaining count used to be the headline of the
+                    row (a big centered badge) — now that the right half
+                    carries the same full detail as the Contacts tab, it
+                    moves into this small corner badge instead, and only
+                    shows up once the occasion is close (≤7 days), same
+                    threshold as the Contacts tab's own corner badge. */}
+                {item.days <= 7 && (
+                  <div className="absolute right-3 top-3">
+                    <span
+                      className={`badge shrink-0 whitespace-nowrap ${
+                        item.kind === "birthday"
+                          ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
+                          : "bg-pink-100 text-pink-700 dark:bg-pink-500/15 dark:text-pink-400"
+                      }`}
+                    >
+                      {icon} {item.days === 0 ? "Today" : `${item.days}d`}
+                    </span>
+                  </div>
+                )}
+
                 {/* gap-1 (not 1.5) — same reasoning as the Contacts tab's
                     ContactCard: the avatar's own height already pads this
                     row out, so the full 1.5 gap read as too much space
                     between the name and the relationship badge below it. */}
-                <div className="flex w-[42%] shrink-0 flex-col items-start gap-1">
+                <div className="flex w-[46%] shrink-0 flex-col items-start gap-1">
                   <div className="flex min-w-0 items-center gap-1.5">
                     <span
                       className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white shadow-sm"
@@ -297,48 +320,61 @@ export function DashboardClient({
 
                 <div className="w-px shrink-0 self-stretch" style={{ background: "var(--border)" }} />
 
-                {/* items-center + text-center: the days-remaining badge and
-                    occasion line are centered within this half instead of
-                    hugging the left edge (next to the divider), so the two
-                    halves read as a balanced pair rather than lopsided. */}
-                <div className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 text-center">
-                  <span
-                    className="badge w-fit shrink-0 whitespace-nowrap"
-                    style={
-                      item.days === 0
-                        ? { background: "var(--accent)", color: "var(--accent-fg)" }
-                        : { background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--muted)" }
-                    }
-                  >
-                    {item.days === 0 ? (
-                      "Today 🎉"
-                    ) : (
-                      <>
-                        {item.days} Day{item.days === 1 ? "" : "s"}
-                        {/* "Remaining" only fits alongside everything else once the
-                            row has room to breathe (sm breakpoint+) — hidden on a
-                            mobile-width screen so nothing wraps or gets clipped. */}
-                        <span className="hidden sm:inline">&nbsp;Remaining</span>
-                      </>
-                    )}
-                  </span>
-                  {/* Occasion + count merged into one line ("52nd Birthday"),
-                      with a small icon so birthdays and anniversaries read apart
-                      at a glance without parsing the text. Fixed amber/pink instead
-                      of --accent: --accent is user-customizable (Settings >
-                      Appearance) and a darker custom pick could go low-contrast
-                      on the dark card background — these have explicit dark:
-                      overrides so they stay readable no matter the theme. */}
-                  <p
-                    className={`flex items-center gap-1.5 text-xs font-semibold ${
-                      item.kind === "birthday"
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-pink-600 dark:text-pink-400"
-                    }`}
-                  >
-                    {occasionLabel}
-                    <span aria-hidden="true">{icon}</span>
-                  </p>
+                {/* Same field set and layout as the Contacts tab's
+                    ContactCard right half — birthday, anniversary, email,
+                    phone + WhatsApp button, address — so an Upcoming entry
+                    here is the same contact card, not a condensed stand-in. */}
+                <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5 text-xs text-[var(--muted)]">
+                  {item.contact.date_of_birth && (
+                    <span className="flex items-start gap-1.5">
+                      <Cake size={12} className="mt-0.5 shrink-0" />
+                      <span className="break-words">
+                        {formatFriendlyDate(item.contact.date_of_birth)}
+                        {birthdayAge !== null && ` · Turning ${birthdayAge}`}
+                      </span>
+                    </span>
+                  )}
+                  {item.contact.anniversary_date && (
+                    <span className="flex items-start gap-1.5">
+                      <Heart size={12} className="mt-0.5 shrink-0" />
+                      <span className="break-words">
+                        {formatFriendlyDate(item.contact.anniversary_date)}
+                        {anniversaryYears !== null && ` · ${ordinal(anniversaryYears)} Anniv.`}
+                      </span>
+                    </span>
+                  )}
+                  {item.contact.email && (
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Mail size={12} className="shrink-0" /> <span className="truncate">{item.contact.email}</span>
+                    </span>
+                  )}
+                  {item.contact.phone && (
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Phone size={12} className="shrink-0" />
+                      <span className="truncate">{item.contact.phone}</span>
+                      {/* A span, not a nested <a>/<button> — the whole row
+                          sits inside a card, and stopping propagation here
+                          keeps the tap from bubbling to anything above it. */}
+                      <span
+                        role="button"
+                        aria-label={`Message ${item.contact.full_name} on WhatsApp`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(whatsappLink(item.contact.phone!), "_blank", "noopener,noreferrer");
+                        }}
+                        className="relative ml-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white before:absolute before:-inset-1.5 before:content-['']"
+                        style={{ background: "#25D366" }}
+                      >
+                        <WhatsAppIcon size={14} />
+                      </span>
+                    </span>
+                  )}
+                  {item.contact.address && (
+                    <span className="flex items-start gap-1.5">
+                      <MapPin size={12} className="mt-0.5 shrink-0" />
+                      <span className="break-words">{item.contact.address}</span>
+                    </span>
+                  )}
                 </div>
               </div>
               );
