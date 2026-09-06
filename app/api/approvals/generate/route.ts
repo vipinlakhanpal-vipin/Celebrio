@@ -55,11 +55,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: contactsError.message }, { status: 500 });
   }
 
+  // Was `=== LEAD_DAYS` — only ever caught a contact on the one day its
+  // occasion sat exactly 2 days out. A contact added (or whose date was
+  // edited) after that single day's run passed silently fell through the
+  // gap forever: tomorrow the same birthday reads as 1 day out, never 2
+  // again, so no approval was ever created and there was nothing to catch
+  // up on missed days. `<= LEAD_DAYS` (and `>= 0` so a same-day add doesn't
+  // reach backwards into an occasion that already passed) turns this into
+  // a window — anything due within the next 2 days gets processed every
+  // run — while the existing "already has an approval for this occasion"
+  // check right below still guards against re-drafting the same occasion
+  // on each of those days.
   const all = (contacts || []) as ContactRow[];
-  const dueBirthdays = all.filter((c) => c.date_of_birth && daysUntilNextOccurrence(c.date_of_birth, now) === LEAD_DAYS);
-  const dueAnniversaries = all.filter(
-    (c) => c.anniversary_date && daysUntilNextOccurrence(c.anniversary_date, now) === LEAD_DAYS
-  );
+  const dueBirthdays = all.filter((c) => {
+    if (!c.date_of_birth) return false;
+    const days = daysUntilNextOccurrence(c.date_of_birth, now);
+    return days >= 0 && days <= LEAD_DAYS;
+  });
+  const dueAnniversaries = all.filter((c) => {
+    if (!c.anniversary_date) return false;
+    const days = daysUntilNextOccurrence(c.anniversary_date, now);
+    return days >= 0 && days <= LEAD_DAYS;
+  });
 
   if (dueBirthdays.length === 0 && dueAnniversaries.length === 0) {
     return NextResponse.json({ created: 0, message: "Nothing due for approval today" });
