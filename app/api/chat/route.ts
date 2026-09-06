@@ -15,8 +15,18 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json();
-  const userMessage = String(body.message || "").trim();
+  // A request with no body (or malformed JSON) used to throw here
+  // unguarded, which Next.js turned into a bare 500 with no JSON to parse —
+  // the client's `res.json()` then threw too, so every failure surfaced as
+  // the same generic "something went wrong" with nothing useful logged.
+  // Parsing defensively at least returns a real, catchable error message.
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+  const userMessage = String((body as { message?: string })?.message || "").trim();
   if (!userMessage) return NextResponse.json({ error: "Message is required" }, { status: 400 });
 
   // Persist the user's message immediately.
