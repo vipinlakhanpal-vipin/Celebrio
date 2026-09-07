@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, Sparkles, Mail, MessageCircle, Loader2, RotateCcw, AlertCircle } from "lucide-react";
+import { Check, X, Sparkles, Mail, MessageCircle, Loader2, RotateCcw, AlertCircle, Maximize2 } from "lucide-react";
 import { Approval } from "@/lib/types";
 import { formatFriendlyDate } from "@/lib/date-utils";
 
@@ -24,6 +24,7 @@ export function ApprovalCard({
   const [message, setMessage] = useState(approval.message);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const contact = approval.contact!;
 
   async function patch(body: Record<string, unknown>, busyKey: string) {
@@ -52,14 +53,23 @@ export function ApprovalCard({
     <div className="card animate-float-in overflow-hidden">
       <div className="flex flex-col gap-4 p-4 md:flex-row">
         {approval.card_image_url && (
-          // Card images live on the user's own Supabase storage domain, which varies per deployment,
-          // so a static next/image remotePatterns entry isn't practical here.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={approval.card_image_url}
-            alt={`Birthday card for ${contact.full_name}`}
-            className="h-44 w-full shrink-0 rounded-xl border border-[var(--border)] object-cover md:h-auto md:w-44"
-          />
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            className="group relative h-44 w-full shrink-0 overflow-hidden rounded-xl border border-[var(--border)] md:h-auto md:w-44"
+          >
+            {/* Card images live on the user's own Supabase storage domain, which varies per deployment,
+                so a static next/image remotePatterns entry isn't practical here. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={approval.card_image_url}
+              alt={`Birthday card for ${contact.full_name}`}
+              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+            />
+            <span className="absolute inset-0 flex items-center justify-center gap-1.5 bg-black/0 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:bg-black/35 group-hover:opacity-100">
+              <Maximize2 size={13} /> View full size
+            </span>
+          </button>
         )}
 
         <div className="flex-1">
@@ -180,6 +190,29 @@ export function ApprovalCard({
           </div>
         </div>
       </div>
+
+      {lightboxOpen && approval.card_image_url && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(false)}
+            aria-label="Close"
+            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+          >
+            <X size={20} />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={approval.card_image_url}
+            alt={`Birthday card for ${contact.full_name}`}
+            className="max-h-[90vh] max-w-[90vw] rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
